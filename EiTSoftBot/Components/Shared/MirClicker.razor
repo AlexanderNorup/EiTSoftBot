@@ -1,0 +1,8 @@
+﻿@* This is a demo component *@
+
+<img @onclick="()=> Count++" src="https://i.imgur.com/LiYz1Yr.png" style="max-width: 100%; cursor:pointer;" alt="MiR Robot" />
+<p>Count: @Count</p>
+
+@code {
+    private int Count { get; set; }
+}
