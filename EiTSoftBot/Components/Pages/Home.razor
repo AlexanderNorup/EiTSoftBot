@@ -11,6 +11,12 @@
 <div class="row">
     <div class="col-md-6">
         <MirClicker/>
+        <hr/>
+        
+        x:<input type="number" @bind="XValue" /><br/>
+        y:<input type="number" @bind="YValue" /><br />
+        z:<input type="number" @bind="ZValue" /><br />
+        <button class="btn btn-primary" @onclick="AddBox">Add Box</button>
     </div>
     <div class="col-md-6">
         <div class="ThreeJsContainer" id="@ThreeJsContainerId">
@@ -21,12 +27,22 @@
 
 @code {
     private const string ThreeJsContainerId = "3dContainer";
+
+    private double XValue { get; set; } = 0d;
+    private double YValue { get; set; } = 0d;
+    private double ZValue { get; set; } = 0d;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await threeJs.Initialize(ThreeJsContainerId);
-            // await threeJs.AddBox();
+
         }
+    }
+
+    public async Task AddBox()
+    {
+        await threeJs.AddBox(XValue, YValue, ZValue);
     }
 }

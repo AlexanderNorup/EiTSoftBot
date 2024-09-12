@@ -65,16 +65,35 @@ window.initScene = (divId) => {
     };
 }
 
-window.addBox = () => {
+window.addBox = (x, y, z) => {
     if (!isInitialized()) {
         return;
     }
+    var textureLoader = new THREE.TextureLoader();
+    var texture = textureLoader.load('/models/box.png');
+
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const material = new THREE.MeshBasicMaterial({ map: texture });
     const cube = new THREE.Mesh(geometry, material);
+    cube.position.add(getPosFrom2DWorld(x, y, z));
     scene.add(cube);
 }
 
 window.isInitialized = () => {
     return scene != null && camera != null && renderer != null;
+}
+
+const mirOffset = { x: -1.8, y: 1.05, z: -3.3 };
+function getMirOffsetVector(x, y, z) {
+    return new THREE.Vector3(x + mirOffset.x, y + mirOffset.y, z + mirOffset.z);
+}
+
+function getPosFrom2DWorld(x, y, z) {
+    // In the 2D view the Y-axis is our Z-axis
+    // The X-axis is our X-axis
+    // The Z-axis is our Y-axis
+
+    // Scale
+    const scale = 0.01;
+    return new getMirOffsetVector(x * scale, z * scale, y * scale);
 }

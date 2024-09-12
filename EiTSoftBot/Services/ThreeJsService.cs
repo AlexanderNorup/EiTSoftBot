@@ -20,9 +20,9 @@ namespace EiTSoftBot.Services
             await _jsRuntime.InvokeVoidAsync("isInitialized");
         }
 
-        public async Task AddBox()
+        public async Task AddBox(double x, double y, double z)
         {
-            await _jsRuntime.InvokeVoidAsync("addBox");
+            await _jsRuntime.InvokeVoidAsync("addBox", x, y ,z);
         }
     }
 }
