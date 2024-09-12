@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sketch</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+  </head>
+
+  <body>
+    <script src="box.js"></script>
+    <script src="sketch.js"></script>
+    <div style="display: flex; gap: 20px;">
+      <div id="canvasContainer"></div>
+      <div>
+        <h2>Enter Box Dimensions</h2>
+        <div>
+            <label for="x">X-coordinate:</label>
+            <input type="number" id="x" name="x" placeholder="Enter X-coordinate">
+        </div>
+        <div>
+            <label for="y">Y-coordinate:</label>
+            <input type="number" id="y" name="y" placeholder="Enter Y-coordinate">
+        </div>
+        <div>
+            <label for="width">Width:</label>
+            <input type="number" id="width" name="width" placeholder="Enter width">
+        </div>
+        <div>
+            <label for="length">Length:</label>
+            <input type="number" id="length" name="length" placeholder="Enter length">
+        </div>
+        <div>
+            <label for="height">Height:</label>
+            <input type="number" id="height" name="height" placeholder="Enter height">
+        </div>
+        <div>
+            <label for="weight">Weight:</label>
+            <input type="number" id="weight" name="weight" placeholder="Enter weight">
+        </div>
+        <button onclick="callAddBox()">Add Box</button>
+      </div>
+        
+    </div>
+
+    <script>
+      function callAddBox() {
+        const x = document.getElementById('x').value;
+        const y = document.getElementById('y').value;
+        const width = document.getElementById('width').value;
+        const length = document.getElementById('length').value;
+        const height = document.getElementById('height').value;
+        const weight = document.getElementById('weight').value;
+
+        // Construct the function call string
+        const functionCall = `addBox(${x}, ${y}, ${width}, ${length}, ${height}, ${weight})`;
+
+        // Use eval to call the function with the constructed string
+        eval(functionCall);
+      }
+    </script>
+  </body>
+</html>
