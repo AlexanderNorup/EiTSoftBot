@@ -1,6 +1,10 @@
 ﻿@page "/"
-
+@inject ThreeJsService threeJs
+@inject IJSRuntime jsRuntime
 <PageTitle>MiR Configurator</PageTitle>
+<HeadContent>
+    <script type="module" src="/js/threeJsInterop.js"></script>
+</HeadContent>
 
 <h1>MiR Configurator</h1>
 
@@ -9,6 +13,20 @@
         <MirClicker/>
     </div>
     <div class="col-md-6">
-        <p>Indsæt 3D here</p>
+        <div class="ThreeJsContainer" id="@ThreeJsContainerId">
+            <!-- 3d Canvas will appear here -->
+        </div>
     </div>
 </div>
+
+@code {
+    private const string ThreeJsContainerId = "3dContainer";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await threeJs.Initialize(ThreeJsContainerId);
+            // await threeJs.AddBox();
+        }
+    }
+}

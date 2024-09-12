@@ -1,10 +1,13 @@
 using EiTSoftBot.Components;
+using EiTSoftBot.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<ThreeJsService>();
 
 var app = builder.Build();
 
@@ -18,7 +21,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions()
+{
+    ServeUnknownFileTypes = true,
+});
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
