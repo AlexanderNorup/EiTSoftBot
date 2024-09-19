@@ -146,7 +146,7 @@ window.init3DScene = (divId) => {
             const selectedObject = intersects[0].object;
             const boxId = selectedObject.userData.boxId;
             if (boxId !== undefined) {
-                console.log("You clicked this box:", selectedObject.userData.boxId);
+                window.highlight2DBox(boxId)
             }
         }
     }
@@ -164,8 +164,8 @@ window.update3DBox = (box) => {
     }
     let { x, y, z } = getPosFrom2DWorld(box.x, box.y, box.z);;
     cube.position.set(x, y, z);
-    if (box.mouseOver) {
-        outlinePass.selectedObjects = [cube];
+    if (box.mouseOver || box.highlight) {
+        outlinePass.selectedObjects.push(cube);
     }
     if (box.dragging) {
         cube.material.wireframe = true;

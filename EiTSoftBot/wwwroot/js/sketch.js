@@ -124,30 +124,33 @@ window.sketch = (p) => {
         return boxUnderMouse;
     }
     
-    function highlight(id) {
-        if(highlightBox != null) {
-            highlightBox.highlight = false;
-            highlightBox = null;
-        }
-        boxes.forEach((box) => {
-            if(box.id === id) {
-                highlightBox = box;
-                highlightBox.highlight = true;
-            }
-        })
-        
-    }
-
-    p.mousePressed = (event) => {
+    window.highlight2DBox = (id) => {
         if (highlightBox != null) {
             highlightBox.highlight = false;
             highlightBox = null;
         }
-        
+
+        boxes.forEach((box) => {
+            if (box.id === id) {
+                highlightBox = box;
+                highlightBox.highlight = true;
+            }
+        })
+    };
+
+    function removeHighlight() {
+        if (highlightBox != null) {
+            highlightBox.highlight = false;
+            highlightBox = null;
+        }
+    }
+
+    p.mousePressed = (event) => {
         if (event.which === 1) {
             dragging = true;
             currentBox = getBoxUnderMouse();
             if (currentBox != null) {
+                removeHighlight();
                 dragging = true;
                 currentBox.dragging = true;
                 currentBox.offsetX = currentBox.x - p.mouseX;
@@ -156,6 +159,7 @@ window.sketch = (p) => {
         } else if (event.which === 2) {
             let toRemove = getBoxUnderMouse();
             if (toRemove != null) {
+                removeHighlight();
                 boxes.splice(boxes.indexOf(toRemove), 1);
                 window.remove3DBox(toRemove.id);
             }
