@@ -10,7 +10,7 @@ let scene;
 let camera;
 let renderer;
 
-window.initScene = (divId) => {
+window.init3DScene = (divId) => {
     let containerDiv = document.getElementById(divId);
     if (containerDiv == null) {
         console.error("Failed to initialize scene. Could not find div with id: " + divId);
@@ -65,8 +65,8 @@ window.initScene = (divId) => {
     };
 }
 
-window.addBox = (x, y, z) => {
-    if (!isInitialized()) {
+window.add3DBox = (x, y, z) => {
+    if (!is3DInitialized()) {
         return;
     }
     var textureLoader = new THREE.TextureLoader();
@@ -79,7 +79,7 @@ window.addBox = (x, y, z) => {
     scene.add(cube);
 }
 
-window.isInitialized = () => {
+window.is3DInitialized = () => {
     return scene != null && camera != null && renderer != null;
 }
 

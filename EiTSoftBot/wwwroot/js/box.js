@@ -13,24 +13,24 @@ class Box {
       this.offsetY = 0;
     }
   
-    update() {
+    update(p) {
       if (this.dragging) {
-        this.x = mouseX + this.offsetX;
-        this.y = mouseY + this.offsetY;
+        this.x = p.mouseX + this.offsetX;
+        this.y = p.mouseY + this.offsetY;
       }
     }
   
-    show() {
-      stroke(0);
+    show(p) {
+      p.stroke(0);
       if (this.dragging) {
-        fill(50);
+        p.fill(50);
       } else {
-        fill(150);
+        p.fill(150);
       }
-      rect(this.x, this.y, this.width, this.length);
-      fill(0);
-      stroke(0);
-      text(`Z: ${this.z}\nH: ${this.height}`, this.x + 10, this.y + 20)
+      p.rect(this.x, this.y, this.width, this.length);
+      p.fill(0);
+      p.stroke(0);
+      p.text(`Z: ${this.z}\nH: ${this.height}`, this.x + 10, this.y + 20)
     }
   
   }

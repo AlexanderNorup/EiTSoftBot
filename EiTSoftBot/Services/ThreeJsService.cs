@@ -12,17 +12,17 @@ namespace EiTSoftBot.Services
 
         public async Task Initialize(string containerId)
         {
-            await _jsRuntime.InvokeVoidAsync("initScene", containerId);
+            await _jsRuntime.InvokeVoidAsync("init3DScene", containerId);
         }
 
         public async Task IsInitialized()
         {
-            await _jsRuntime.InvokeVoidAsync("isInitialized");
+            await _jsRuntime.InvokeVoidAsync("is3DInitialized");
         }
 
         public async Task AddBox(double x, double y, double z)
         {
-            await _jsRuntime.InvokeVoidAsync("addBox", x, y ,z);
+            await _jsRuntime.InvokeVoidAsync("add3DBox", x, y ,z);
         }
     }
 }
