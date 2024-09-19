@@ -42,8 +42,10 @@ window.init3DScene = (divId) => {
         return;
     }
 
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(containerDiv.clientWidth, containerDiv.clientHeight);
+    renderer.setClearColor(0x222222, .0);
+    renderer.shadowMap.enabled = true;
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
 
@@ -70,6 +72,8 @@ window.init3DScene = (divId) => {
         const model = gltf.scene;
         model.position.set(0, -3, 0);
         model.scale.set(0.01, 0.01, 0.01);
+        model.receiveShadow = true;
+        model.castShadow = false;
         scene.add(model);
     }, undefined, function (e) {
         console.error("Failed to load MiR Model: ", e);
@@ -84,11 +88,13 @@ window.init3DScene = (divId) => {
     composer.addPass(renderPass);
 
     outlinePass = new OutlinePass(new THREE.Vector2(containerDiv.clientWidth, containerDiv.clientHeight), scene, camera);
+    outlinePass.renderToScreen = true;
     outlinePass.edgeStrength = 3;
-    outlinePass.edgeGlow = 0.5;
-    outlinePass.edgeThichness = 1;
+    outlinePass.edgeGlow = 0;
+    outlinePass.edgeThickness = 1;
     outlinePass.visibleEdgeColor.set('#ffffff');
-    outlinePass.hiddenEdgeColor.set('#190a05');
+    outlinePass.hiddenEdgeColor.set('#eeeeee');
+   
     composer.addPass(outlinePass);
 
     const outputPass = new OutputPass();
@@ -137,6 +143,8 @@ function add3DBox(box) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const cube = new THREE.Mesh(geometry, material);
+    cube.receiveShadow = true;
+    cube.castShadow = true;
     cube.position.add(getPosFrom2DWorld(x, y, z));
     boxMapping[box.id] = cube;
     scene.add(cube);
