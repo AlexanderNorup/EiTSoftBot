@@ -127,9 +127,11 @@ window.update3DBox = (box) => {
     }
     let { x, y, z } = getPosFrom2DWorld(box.x, box.y, box.z);;
     cube.position.set(x, y, z);
+    if (box.mouseOver) {
+        outlinePass.selectedObjects = [cube];
+    }
     if (box.dragging) {
         cube.material.wireframe = true;
-        //outlinePass.selectedObjects = [cube];
     } else {
         cube.material.wireframe = false;
     }
@@ -139,16 +141,22 @@ function add3DBox(box) {
     if (!is3DInitialized()) {
         return;
     }
-    let { x, y, z } = box;
+    let { x, y, z, width, length, height } = box;
     var textureLoader = new THREE.TextureLoader();
-    var texture = textureLoader.load('/models/box.png');
+    let texture;
+    if (box.weight >= 200) {
+        texture = textureLoader.load('/models/heavy_box.png');
+    } else {
+        texture = textureLoader.load('/models/box.png');
+    }
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const geometry = new THREE.BoxGeometry(width / 100, height / 100, length / 100);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const cube = new THREE.Mesh(geometry, material);
     cube.receiveShadow = true;
     cube.castShadow = true;
-    cube.position.add(getPosFrom2DWorld(x, y, z));
+    let newPos = getPosFrom2DWorld(x, y, z);
+    cube.position.set(newPos.x, newPos.y, newPos.z);
     boxMapping[box.id] = cube;
     scene.add(cube);
 }
