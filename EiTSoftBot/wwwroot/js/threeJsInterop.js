@@ -94,7 +94,7 @@ window.init3DScene = (divId) => {
     outlinePass.edgeThickness = 1;
     outlinePass.visibleEdgeColor.set('#ffffff');
     outlinePass.hiddenEdgeColor.set('#eeeeee');
-   
+
     composer.addPass(outlinePass);
 
     const outputPass = new OutputPass();
@@ -128,7 +128,10 @@ window.update3DBox = (box) => {
     let { x, y, z } = getPosFrom2DWorld(box.x, box.y, box.z);;
     cube.position.set(x, y, z);
     if (box.dragging) {
-        outlinePass.selectedObjects = [cube];
+        cube.material.wireframe = true;
+        //outlinePass.selectedObjects = [cube];
+    } else {
+        cube.material.wireframe = false;
     }
 };
 
