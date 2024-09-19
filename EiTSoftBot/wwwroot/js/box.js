@@ -24,6 +24,8 @@ class Box {
       p.stroke(0);
       if (this.dragging) {
         p.fill(50);
+      } else if (this.mouseOver) {
+        p.fill(100);
       } else {
         p.fill(150);
       }
