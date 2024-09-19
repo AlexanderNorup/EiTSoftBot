@@ -13,6 +13,10 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
+
+// 2d to 3d Scale
+const scale = 0.01;
+
 /**
  * @type {THREE.Scene}
  */
@@ -150,7 +154,8 @@ function add3DBox(box) {
         texture = textureLoader.load('/models/box.png');
     }
 
-    const geometry = new THREE.BoxGeometry(width / 100, height / 100, length / 100);
+    const geometry = new THREE.BoxGeometry(width * scale, height * scale, length * scale);
+    geometry.translate(width * scale / 2, height * scale / 2, length * scale / 2);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const cube = new THREE.Mesh(geometry, material);
     cube.receiveShadow = true;
@@ -165,7 +170,7 @@ window.is3DInitialized = () => {
     return scene != null && camera != null && renderer != null;
 }
 
-const mirOffset = { x: -1.8, y: 1.05, z: -3.3 };
+const mirOffset = { x: -2.25, y: 0.55, z: -3.8 };
 /**
  * @param {number} x
  * @param {number} y
@@ -187,7 +192,5 @@ function getPosFrom2DWorld(x, y, z) {
     // The X-axis is our X-axis
     // The Z-axis is our Y-axis
 
-    // Scale
-    const scale = 0.01;
     return new getMirOffsetVector(x * scale, z * scale, y * scale);
 }
