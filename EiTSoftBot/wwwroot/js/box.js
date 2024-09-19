@@ -3,6 +3,7 @@ class Box {
       this.id = crypto.randomUUID();
       this.dragging = false;
       this.mouseOver = false;
+      this.highlight = false;
       this.x = x;
       this.y = y;
       this.z = 0;
@@ -27,6 +28,8 @@ class Box {
         p.fill(50);
       } else if (this.mouseOver) {
         p.fill(100);
+      } else if (this.highlight) {
+        p.fill('green');
       } else {
         p.fill(150);
       }
