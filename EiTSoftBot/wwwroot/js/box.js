@@ -2,6 +2,7 @@ class Box {
     constructor(x, y, width, length, height, weight) {
       this.id = crypto.randomUUID();
       this.dragging = false;
+      this.mouseOver = false;
       this.x = x;
       this.y = y;
       this.z = 0;
@@ -24,6 +25,8 @@ class Box {
       p.stroke(0);
       if (this.dragging) {
         p.fill(50);
+      } else if (this.mouseOver) {
+        p.fill(100);
       } else {
         p.fill(150);
       }
