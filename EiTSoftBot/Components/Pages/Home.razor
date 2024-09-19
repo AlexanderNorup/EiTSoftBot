@@ -46,12 +46,6 @@
         <div class="ThreeJsContainer" id="@ThreeJsContainerId">
             <!-- 3d Canvas will appear here -->
         </div>
-        <hr/>
-
-        x:<input type="number" @bind="XValue" /><br />
-        y:<input type="number" @bind="YValue" /><br />
-        z:<input type="number" @bind="ZValue" /><br />
-        <button class="btn btn-primary" @onclick="AddBox">Add Box</button>
     </div>
 </div>
 
@@ -74,8 +68,4 @@
         }
     }
 
-    public async Task AddBox()
-    {
-        await threeJs.AddBox(XValue, YValue, ZValue);
-    }
 }

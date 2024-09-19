@@ -1,7 +1,7 @@
 class Box {
-    constructor (x, y, width, length, height, weight) {
+    constructor(x, y, width, length, height, weight) {
+      this.id = crypto.randomUUID();
       this.dragging = false;
-      this.mouseOver = false;
       this.x = x;
       this.y = y;
       this.z = 0;
@@ -30,7 +30,11 @@ class Box {
       p.rect(this.x, this.y, this.width, this.length);
       p.fill(0);
       p.stroke(0);
-      p.text(`Z: ${this.z}\nH: ${this.height}`, this.x + 10, this.y + 20)
+      p.text(`Z: ${this.z}\nH: ${this.height}`, this.x + 10, this.y + 20);
+
+      if (window.update3DBox !== undefined) {
+        window.update3DBox(this);
+      }
     }
   
   }

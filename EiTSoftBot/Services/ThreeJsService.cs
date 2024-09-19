@@ -19,10 +19,5 @@ namespace EiTSoftBot.Services
         {
             await _jsRuntime.InvokeVoidAsync("is3DInitialized");
         }
-
-        public async Task AddBox(double x, double y, double z)
-        {
-            await _jsRuntime.InvokeVoidAsync("add3DBox", x, y ,z);
-        }
     }
 }
