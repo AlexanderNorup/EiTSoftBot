@@ -9,6 +9,7 @@ window.sketch = (p) => {
     let dragging = false;
     let currentBox = null;
     let hoverBox = null;
+    let highlightBox = null;
 
     p.setup = () => {
         let canvas = p.createCanvas(450, 760); // MIR size: w: 4.5, h: 7.6: 
@@ -122,15 +123,42 @@ window.sketch = (p) => {
         })
         return boxUnderMouse;
     }
+    
+    function highlight(id) {
+        if(highlightBox != null) {
+            highlightBox.highlight = false;
+            highlightBox = null;
+        }
+        boxes.forEach((box) => {
+            if(box.id === id) {
+                highlightBox = box;
+                highlightBox.highlight = true;
+            }
+        })
+        
+    }
 
-    p.mousePressed = () => {
-        dragging = true;
-        currentBox = getBoxUnderMouse();
-        if (currentBox != null) {
+    p.mousePressed = (event) => {
+        if (highlightBox != null) {
+            highlightBox.highlight = false;
+            highlightBox = null;
+        }
+        
+        if (event.which === 1) {
             dragging = true;
-            currentBox.dragging = true;
-            currentBox.offsetX = currentBox.x - p.mouseX;
-            currentBox.offsetY = currentBox.y - p.mouseY;
+            currentBox = getBoxUnderMouse();
+            if (currentBox != null) {
+                dragging = true;
+                currentBox.dragging = true;
+                currentBox.offsetX = currentBox.x - p.mouseX;
+                currentBox.offsetY = currentBox.y - p.mouseY;
+            }
+        } else if (event.which === 2) {
+            let toRemove = getBoxUnderMouse();
+            if (toRemove != null) {
+                boxes.splice(boxes.indexOf(toRemove), 1);
+                window.remove3DBox(toRemove.id);
+            }
         }
     };
 

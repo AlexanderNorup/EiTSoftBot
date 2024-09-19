@@ -166,6 +166,15 @@ function add3DBox(box) {
     scene.add(cube);
 }
 
+window.remove3DBox = (id) => {
+    let cube = boxMapping[id];
+    if (cube === undefined) {
+        return;
+    }
+    boxMapping[id] = undefined;
+    scene.remove(cube);
+}
+
 window.is3DInitialized = () => {
     return scene != null && camera != null && renderer != null;
 }
