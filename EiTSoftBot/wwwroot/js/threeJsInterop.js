@@ -51,13 +51,18 @@ window.init3DScene = (divId) => {
     renderer.setClearColor(0x222222, .0);
     renderer.shadowMap.enabled = true;
 
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xbfe3dd);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
     camera = new THREE.PerspectiveCamera(75, containerDiv.clientWidth / containerDiv.clientHeight, 0.1, 1000);
-    camera.position.z = 10;
+    camera.position.z = 5;
+    camera.position.y = 7;
+    camera.position.x = -4;
 
     containerDiv.appendChild(renderer.domElement);
 
@@ -78,6 +83,7 @@ window.init3DScene = (divId) => {
         model.scale.set(0.01, 0.01, 0.01);
         model.receiveShadow = true;
         model.castShadow = false;
+        camera.lookAt(model.position);
         scene.add(model);
     }, undefined, function (e) {
         console.error("Failed to load MiR Model: ", e);
@@ -117,6 +123,33 @@ window.init3DScene = (divId) => {
         renderer.setSize(containerDiv.clientWidth, containerDiv.clientHeight);
         composer.setSize(containerDiv.clientWidth, containerDiv.clientHeight);
     };
+
+    renderer.domElement.style.touchAction = 'none';
+    renderer.domElement.addEventListener('pointerdown', onPointerDown);
+
+    function onPointerDown(event) {
+        if (event.isPrimary === false || event.buttons !== 1) return;
+        const rect = renderer.domElement.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        mouse.x = (x / containerDiv.clientWidth) * 2 - 1;
+        mouse.y = (y / containerDiv.clientHeight) * - 2 + 1
+
+        checkIntersection();
+    }
+
+    function checkIntersection() {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObject(scene, true);
+        if (intersects.length > 0) {
+            const selectedObject = intersects[0].object;
+            const boxId = selectedObject.userData.boxId;
+            if (boxId !== undefined) {
+                console.log("You clicked this box:", selectedObject.userData.boxId);
+            }
+        }
+    }
 }
 
 /**
@@ -162,6 +195,7 @@ function add3DBox(box) {
     cube.castShadow = true;
     let newPos = getPosFrom2DWorld(x, y, z);
     cube.position.set(newPos.x, newPos.y, newPos.z);
+    cube.userData.boxId = box.id;
     boxMapping[box.id] = cube;
     scene.add(cube);
 }
