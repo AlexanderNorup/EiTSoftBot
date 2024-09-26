@@ -40,6 +40,18 @@
             </div>
             <button onclick="callAddBox()">Add Box</button>
         </div>
+
+        <div>
+            <h2>Snapping</h2>
+            <div>
+                <label for="snapping">Snapping:</label>
+                <input type="checkbox" id="snapping" name="snapping" placeholder="" onchange="changeSnapping()" checked>
+            </div>
+            <div>
+                <label for="snappingFactor">Snapping Factor:</label>
+                <input type="number" id="snappingFactor" name="snappingFactor" value="50" placeholder="Enter snapping factor" onchange="changeSnappingFactor()">
+            </div>
+        </div>
        
     </div>
     <div class="col-md-6">
