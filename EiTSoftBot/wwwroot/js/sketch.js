@@ -101,6 +101,7 @@ window.sketch = (p) => {
         mouseReleaseCollision(boxes);
         if (currentBox != null) {
             currentBox.dragging = false;
+            currentBox.highlight = true;
             currentBox = null;
         }
         dragging = false;

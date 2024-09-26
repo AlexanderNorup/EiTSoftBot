@@ -43,10 +43,10 @@ class Box {
         p.stroke(0);
         if (this.dragging) {
             p.fill(50);
-        } else if (this.mouseOver) {
-            p.fill(100);
         } else if (this.highlight) {
             p.fill('green');
+        } else if (this.mouseOver) {
+            p.fill(100);
         } else {
             p.fill(150);
         }
