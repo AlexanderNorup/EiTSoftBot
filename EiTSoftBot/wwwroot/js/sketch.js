@@ -10,6 +10,16 @@ window.sketch = (p) => {
     let currentBox = null;
     let hoverBox = null;
     let highlightBox = null;
+    let snapping = true;
+    let snappingFactor = 50;
+    
+    window.changeSnapping = () => {
+        snapping = document.getElementById('snapping').checked;
+    };
+    
+    window.changeSnappingFactor = () => {
+        snappingFactor = parseInt(document.getElementById('snappingFactor').value);
+    };
 
     p.setup = () => {
         let canvas = p.createCanvas(450, 760); // MIR size: w: 4.5, h: 7.6: 
@@ -25,7 +35,7 @@ window.sketch = (p) => {
     window.addBox = (x, y, width, length, height, weight) => {
         let newBox = new Box(x, y, width, length, height, weight);
         boxes.push(newBox);
-        handleCollisionCurrentOrNew(newBox, boxes);
+        handleCollisionCurrentOrNew(newBox, boxes, false);
         sortBoxes(boxes);
     };
     
@@ -47,8 +57,11 @@ window.sketch = (p) => {
         }
         boxes.forEach((box) => {
             if (box === currentBox) {
-                handleCollisionCurrentOrNew(box, boxes);
+                handleCollisionCurrentOrNew(box, boxes, snapping);
                 box.update(p);
+                if (snapping) {
+                    box.showSnap(p, snappingFactor);
+                }
             }
             box.show(p);
         });
@@ -92,6 +105,11 @@ window.sketch = (p) => {
     };
 
     p.mouseReleased = () => {
+        if (snapping && currentBox != null) {
+            currentBox.x = currentBox.snapX;
+            currentBox.y = currentBox.snapY;
+        }
+        
         mouseReleaseCollision(boxes);
         if (currentBox != null) {
             currentBox.dragging = false;
