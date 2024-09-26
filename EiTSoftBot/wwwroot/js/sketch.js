@@ -78,6 +78,17 @@ window.sketch = (p) => {
         window.remove3DBox(id);
     };
 
+    window.removeAll2DBoxes = () => {
+        removeHighlight(boxes);
+        for (let box of boxes) {
+            window.remove3DBox(box.id);
+        }
+        boxes = [];
+        currentBox = null;
+        hoverBox = null;
+        dragging = false;
+    }
+
     p.mousePressed = (event) => {
         if (event.which === 1) {
             dragging = true;
@@ -90,6 +101,7 @@ window.sketch = (p) => {
                 currentBox.offsetY = currentBox.y - p.mouseY;
             }
         } else if (event.which === 2) {
+            // Middlemouse
             let toRemove = getBoxUnderMouse(p, boxes);
             if (toRemove != null) {
                 window.remove2DBox(toRemove.id);
@@ -116,8 +128,6 @@ window.sketch = (p) => {
         }
     };
 };
-
-
 
 window.callAddBox = () => {
     const x = parseInt(document.getElementById('x').value);
