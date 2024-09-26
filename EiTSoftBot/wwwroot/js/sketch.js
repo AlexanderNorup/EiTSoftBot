@@ -9,7 +9,6 @@ window.sketch = (p) => {
     let dragging = false;
     let currentBox = null;
     let hoverBox = null;
-    let highlightBox = null;
     let bgImg = null;
     p.preload = () => {
         bgImg = p.loadImage('/models/mir_surface.png');
@@ -25,7 +24,7 @@ window.sketch = (p) => {
     p.draw = () => {
         p.image(bgImg, 0, 0);
         sortBoxes(boxes);
-        drawBoxes(boxes, hoverBox, currentBox, p);
+        drawBoxes();
     };
 
     window.addBox = (x, y, width, length, height, weight) => {
@@ -38,17 +37,17 @@ window.sketch = (p) => {
     function drawBoxes() {
         if (!dragging) {
             let newHoverBox = getBoxUnderMouse(p, boxes);
-            if (newHoverBox == null && highlightBox != null) {
-                highlightBox.mouseOver = false;
-                highlightBox = null;
+
+            if (hoverBox !== null && (newHoverBox === undefined || newHoverBox.id !== hoverBox.id)) {
+                // We are not hoveríng over the same box anymore.
+                hoverBox.mouseOver = false;
+                hoverBox = null;
             }
-            else if (newHoverBox != null && highlightBox != null) {
-                highlightBox.mouseOver = false;
-                highlightBox = newHoverBox;
-                highlightBox.mouseOver = true;
-            } else if (newHoverBox != null && highlightBox == null) {
-                highlightBox = newHoverBox;
-                highlightBox.mouseOver = true;
+
+            if (newHoverBox !== undefined) {
+                // We are hovering over a box
+                hoverBox = newHoverBox;
+                hoverBox.mouseOver = true;
             }
         }
         boxes.forEach((box) => {
@@ -61,27 +60,30 @@ window.sketch = (p) => {
     }
 
     window.highlight2DBox = (id) => {
-        if (highlightBox != null) {
-            highlightBox.highlight = false;
-            highlightBox = null;
+        if (typeof id === "string") {
+            let box = boxes.find((box) => {
+                return box.id === id;
+            })
+            box.highlight = true;
+        } else {
+            let box = id;
+            box.highlight = true;
         }
-
-        boxes.forEach((box) => {
-            if (box.id === id) {
-                highlightBox = box;
-                highlightBox.highlight = true;
-            }
-        })
     };
 
-
+    window.remove2DBox = (id) => {
+        removeHighlight(boxes);
+        boxes = boxes.filter((box) => box.id !== id);
+        mouseReleaseCollision(boxes);
+        window.remove3DBox(id);
+    };
 
     p.mousePressed = (event) => {
         if (event.which === 1) {
             dragging = true;
             currentBox = getBoxUnderMouse(p, boxes);
             if (currentBox != null) {
-                highlightBox = removeHighlight(highlightBox);
+                removeHighlight(boxes);
                 dragging = true;
                 currentBox.dragging = true;
                 currentBox.offsetX = currentBox.x - p.mouseX;
@@ -90,9 +92,7 @@ window.sketch = (p) => {
         } else if (event.which === 2) {
             let toRemove = getBoxUnderMouse(p, boxes);
             if (toRemove != null) {
-                highlightBox = removeHighlight(highlightBox);
-                boxes.splice(boxes.indexOf(toRemove), 1);
-                window.remove3DBox(toRemove.id);
+                window.remove2DBox(toRemove.id);
             }
         }
     };
@@ -104,6 +104,15 @@ window.sketch = (p) => {
             currentBox = null;
         }
         dragging = false;
+    };
+
+    p.keyPressed = () => {
+        if (p.key === "Delete") {
+            let boxesToDelete = boxes.filter(box => box.highlight);
+            for (var box of boxesToDelete) {
+                window.remove2DBox(box.id);
+            }
+        }
     };
 };
 

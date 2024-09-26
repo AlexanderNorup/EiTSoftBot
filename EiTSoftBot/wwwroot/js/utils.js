@@ -60,12 +60,12 @@ function sortBoxes(bs) {
  * @returns {Box}
  */
 function getBoxUnderMouse(p, bs) {
-    let boxUnderMouse;
+    
     let topBoxZ = 0;
-    bs.forEach((box) => {
+    let boxUnderMouse = bs.find((box) => {
         if (p.mouseX > box.x && p.mouseX < box.x + box.width && p.mouseY > box.y && p.mouseY < box.y + box.length) {
             if (box.z + box.height > topBoxZ) {
-                boxUnderMouse = box;
+                return true;
             }
         }
     })
@@ -73,13 +73,12 @@ function getBoxUnderMouse(p, bs) {
 }
 
 /**
- * @param {Box} hBox
+ * @param {Box[]} boxes
  */
-function removeHighlight(hBox) {
-    if (hBox != null) {
-        hBox.highlight = false;
+function removeHighlight(boxes) {
+    for (let box of boxes) {
+        box.highlight = false;
     }
-    return null;
 }
 
 /**
