@@ -10,14 +10,20 @@ window.sketch = (p) => {
     let currentBox = null;
     let hoverBox = null;
     let highlightBox = null;
+    let bgImg = null;
+    p.preload = () => {
+        bgImg = p.loadImage('/models/mir_surface.png');
+    }
 
     p.setup = () => {
         let canvas = p.createCanvas(450, 760); // MIR size: w: 4.5, h: 7.6: 
         canvas.parent("canvasContainer");
+        // Call the resize function
+        bgImg.resize(p.width, p.height);
     };
 
     p.draw = () => {
-        p.background(220);
+        p.image(bgImg, 0, 0);
         sortBoxes(boxes);
         drawBoxes(boxes, hoverBox, currentBox, p);
     };
@@ -28,7 +34,7 @@ window.sketch = (p) => {
         handleCollisionCurrentOrNew(newBox, boxes);
         sortBoxes(boxes);
     };
-    
+
     function drawBoxes() {
         if (!dragging) {
             let newHoverBox = getBoxUnderMouse(p, boxes);
@@ -53,7 +59,7 @@ window.sketch = (p) => {
             box.show(p);
         });
     }
-    
+
     window.highlight2DBox = (id) => {
         if (highlightBox != null) {
             highlightBox.highlight = false;
@@ -68,7 +74,7 @@ window.sketch = (p) => {
         })
     };
 
-    
+
 
     p.mousePressed = (event) => {
         if (event.which === 1) {
