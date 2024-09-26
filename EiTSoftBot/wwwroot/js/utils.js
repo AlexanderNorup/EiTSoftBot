@@ -75,12 +75,12 @@ function sortBoxes(bs) {
  * @returns {Box}
  */
 function getBoxUnderMouse(p, bs) {
-    
+    let boxUnderMouse;
     let topBoxZ = 0;
-    let boxUnderMouse = bs.find((box) => {
+    bs.forEach((box) => {
         if (p.mouseX > box.x && p.mouseX < box.x + box.width && p.mouseY > box.y && p.mouseY < box.y + box.length) {
             if (box.z + box.height > topBoxZ) {
-                return true;
+                boxUnderMouse = box;
             }
         }
     })
