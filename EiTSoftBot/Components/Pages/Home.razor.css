@@ -1,5 +1,5 @@
 ﻿.ThreeJsContainer {
     width: 100%;
-    min-height: 80vh;
+    min-height: 760px; /* Size of the 2d canvas */
     background: gray;
 }

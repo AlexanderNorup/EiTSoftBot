@@ -75,9 +75,9 @@ window.init3DScene = (divId) => {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('jsm/libs/draco/gltf/');
 
-    const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
-    loader.load('/models/mir200a.glb', function (gltf) {
+    const glbLoader = new GLTFLoader();
+    glbLoader.setDRACOLoader(dracoLoader);
+    glbLoader.load('/models/mir200a.glb', function (gltf) {
         const model = gltf.scene;
         model.position.set(0, -3, 0);
         model.scale.set(0.01, 0.01, 0.01);
@@ -87,6 +87,18 @@ window.init3DScene = (divId) => {
         scene.add(model);
     }, undefined, function (e) {
         console.error("Failed to load MiR Model: ", e);
+    });
+
+    glbLoader.load('/models/warehouse.glb', function (gltf) {
+        const model = gltf.scene;
+        console.log(model);
+        model.position.set(-62.5, -3, 150);
+        model.scale.set(8, 8, 8);
+        model.receiveShadow = true;
+        model.castShadow = false;
+        scene.add(model);
+    }, undefined, function (e) {
+        console.error("Failed to load WareHouse Model: ", e);
     });
 
 
