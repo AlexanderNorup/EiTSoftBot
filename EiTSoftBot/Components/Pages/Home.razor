@@ -9,48 +9,55 @@
 <h1>MiR Configurator</h1>
 
 <div class="row">
-    <div class="col-md-6">
-        <div id="canvasContainer"></div>
-        <hr/>
-        <div>
-            <h2>Enter Box Dimensions</h2>
-            <div>
-                <label for="x">X-coordinate:</label>
-                <input type="number" id="x" name="x" value="0" placeholder="Enter X-coordinate">
+    <div class="col-md-6 row">
+        <div class="col-sm-4">
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,100,100,100,100)">Add small box</button>
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,200,100,100,150)">Add medium box</button>
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,200,200,300,200)">Add large box</button>
+            <button class="btn btn-outline-danger mt-1" onclick="removeAll2DBoxes()">Remove all boxes</button>
+            <button class="btn btn-outline-secondary mt-1" data-bs-toggle="collapse" data-bs-target="#customBoxCollapse">Custom box</button>
+            <div class="collapse" id="customBoxCollapse">
+                <div class="card card-body mt-2">
+                    <h4>Enter Box Dimensions</h4>
+                    <div>
+                        <label class="form-label" for="x">X-coordinate:</label>
+                        <input class="form-control" type="number" id="x" name="x" value="0" placeholder="Enter X-coordinate">
+                    </div>
+                    <div>
+                        <label class="form-label" for="y">Y-coordinate:</label>
+                        <input class="form-control" type="number" id="y" name="y" value="0" placeholder="Enter Y-coordinate">
+                    </div>
+                    <div>
+                        <label class="form-label" for="width">Width:</label>
+                        <input class="form-control" type="number" id="width" name="width" value="100" placeholder="Enter width">
+                    </div>
+                    <div>
+                        <label class="form-label" for="length">Length:</label>
+                        <input class="form-control" type="number" id="length" name="length" value="100" placeholder="Enter length">
+                    </div>
+                    <div>
+                        <label class="form-label" for="height">Height:</label>
+                        <input class="form-control" type="number" id="height" name="height" value="100" placeholder="Enter height">
+                    </div>
+                    <div>
+                        <label class="form-label" for="weight">Weight:</label>
+                        <input class="form-control" type="number" id="weight" name="weight" value="100" placeholder="Enter weight">
+                    </div>
+                    <button class="btn btn-primary mt-1" onclick="callAddBox()">Add Box</button>
+                </div>
             </div>
-            <div>
-                <label for="y">Y-coordinate:</label>
-                <input type="number" id="y" name="y" value="0" placeholder="Enter Y-coordinate">
-            </div>
-            <div>
-                <label for="width">Width:</label>
-                <input type="number" id="width" name="width" value="100" placeholder="Enter width">
-            </div>
-            <div>
-                <label for="length">Length:</label>
-                <input type="number" id="length" name="length" value="100" placeholder="Enter length">
-            </div>
-            <div>
-                <label for="height">Height:</label>
-                <input type="number" id="height" name="height" value="100" placeholder="Enter height">
-            </div>
-            <div>
-                <label for="weight">Weight:</label>
-                <input type="number" id="weight" name="weight" value="100" placeholder="Enter weight">
-            </div>
-            <button class="btn btn-primary me-2" onclick="callAddBox()">Add Box</button>
-            <button class="btn btn-danger" onclick="removeAll2DBoxes()">Remove all boxes</button>
         </div>
-       
+        <div class="col-sm-8" id="canvasContainer">
+        </div>
     </div>
     <div class="col-md-6">
         <div class="ThreeJsContainer" id="@ThreeJsContainerId">
             <!-- 3d Canvas will appear here -->
         </div>
-        <hr/>
+        <hr />
         <p>
-            <b>License info:</b><br/>
-            "Warehouse FBX Model Free" (<a href="https://skfb.ly/oVOIy">https://skfb.ly/oVOIy</a>) by Nicholas-3D is licensed under Creative Commons Attribution (<a href="http://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</a>).<br/>
+            <b>License info:</b><br />
+            "Warehouse FBX Model Free" (<a href="https://skfb.ly/oVOIy">https://skfb.ly/oVOIy</a>) by Nicholas-3D is licensed under Creative Commons Attribution (<a href="http://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</a>).<br />
             "MiR200" (<a href="https://grabcad.com/library/mir200-2">https://grabcad.com/library/mir200-2</a>) by tony ke is provided by the GRABCAD Community.
         </p>
     </div>

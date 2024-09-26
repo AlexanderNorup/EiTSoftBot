@@ -60,6 +60,7 @@ window.sketch = (p) => {
     }
 
     window.highlight2DBox = (id) => {
+        removeHighlight(boxes);
         if (typeof id === "string") {
             let box = boxes.find((box) => {
                 return box.id === id;
