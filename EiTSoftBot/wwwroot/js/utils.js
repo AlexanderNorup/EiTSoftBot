@@ -22,14 +22,16 @@ function mouseReleaseCollision(bs) {
  * If a box is being dragged around or added, it is placed on top of any colliding boxes
  * @param {Box} targetBox
  * @param {Box[]} bs
+ * @param {boolean} snapping
  */
-function handleCollisionCurrentOrNew(targetBox, bs) {
+function handleCollisionCurrentOrNew(targetBox, bs, snapping) {
     let topZ = 0;
     bs.forEach((box) => {
         if (targetBox === box) return;
         if (collisionCheck(targetBox, box)) {
             if (topZ < box.z + box.height) topZ = box.z + box.height
         }
+        
     })
     targetBox.z = topZ;
 }
@@ -40,10 +42,23 @@ function handleCollisionCurrentOrNew(targetBox, bs) {
  * @returns {boolean}
  */
 function collisionCheck(boxA, boxB) {
-    return boxA.x + boxA.width >= boxB.x && // A right edge past B left
-        boxA.x <= boxB.x + boxB.width && // A left edge past B right
-        boxA.y + boxA.length >= boxB.y && // A bottom edge past B top
-        boxA.y <= boxB.y + boxB.length;
+    return boxA.x + boxA.width > boxB.x && // A right edge past B left
+        boxA.x < boxB.x + boxB.width && // A left edge past B right
+        boxA.y + boxA.length > boxB.y && // A bottom edge past B top
+        boxA.y < boxB.y + boxB.length;
+
+}
+
+/** Check collision between boxA's snap position, to boxB's position
+ * @param {Box} boxA
+ * @param {Box} boxB
+ * @returns {boolean}
+ */
+function collisionCheckSnap(boxA, boxB) {
+    return boxA.snapX + boxA.width > boxB.x && // A right edge past B left
+        boxA.snapX < boxB.x + boxB.width && // A left edge past B right
+        boxA.snapY + boxA.length > boxB.y && // A bottom edge past B top
+        boxA.snapY < boxB.y + boxB.length;
 
 }
 

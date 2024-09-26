@@ -6,6 +6,8 @@ class Box {
     x = 0;
     y = 0;
     z = 0;
+    snapX = 0;
+    snapY = 0;
     width = 0;
     length = 0;
     height = 0;
@@ -60,7 +62,16 @@ class Box {
         }
     }
 
+    showSnap(p, gridFactor) {
+        p.stroke(255);
+        p.fill(255);
+        this.snapX = Math.round(this.x / gridFactor) * gridFactor;
+        this.snapY = Math.round(this.y / gridFactor) * gridFactor;
+        p.rect(this.snapX, this.snapY, this.width, this.length);
+    }
 }
+
+
 
 /**
  * Clamps a number between a minimum and maximum value
