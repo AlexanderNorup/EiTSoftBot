@@ -147,7 +147,16 @@ window.sketch = (p) => {
                 window.remove2DBox(box.id);
             }
         }
+        if (p.key === "Alt") {
+            snapping = false;
+        }
     };
+
+    p.keyReleased = () => {
+        if (p.key === "Alt") {
+            changeSnapping();
+        }
+    }
 };
 
 window.callAddBox = () => {
