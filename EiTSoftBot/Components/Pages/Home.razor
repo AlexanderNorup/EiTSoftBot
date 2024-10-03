@@ -10,7 +10,7 @@
 <div class="d-flex justify-content-between align-items-center">
     <h1>MiR Configurator</h1>
     <div>
-        <button @onclick="SubmitBoxes" class="btn btn-success">Send to simulation</button>
+        <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
     </div>
 </div>
 
@@ -92,6 +92,9 @@
     private double YValue { get; set; } = 0d;
     private double ZValue { get; set; } = 0d;
 
+    private bool IsSendingData { get; set; } = false;
+    private string SubmitButtonText { get; set; } = "Send to simulation";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -103,9 +106,33 @@
 
     public async Task SubmitBoxes()
     {
-        var boxes = await mirConfig.GetBoxConfiguration();
-        var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
-        await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
+        if (IsSendingData)
+        {
+            return;
+        }
+
+        IsSendingData = true;
+        SubmitButtonText = "Please wait...";
+        StateHasChanged();
+        try{
+            var boxes = await mirConfig.GetBoxConfiguration();
+            if(boxes.Count == 0)
+            {
+                return;
+            }
+            var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
+            await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
+            await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
+        }catch(Exception e)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Failed to send data to the simulation\n" + e.Message);
+        }
+        finally
+        {
+            IsSendingData = false;
+            SubmitButtonText = "Send to simulation";
+            StateHasChanged();
+        }
     }
 
 }
