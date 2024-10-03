@@ -1,19 +1,25 @@
 ﻿@page "/"
-@inject ThreeJsService threeJs
+@inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
+@inject SimulatorClient simulatorClient
 <PageTitle>MiR Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js"></script>
 </HeadContent>
 
-<h1>MiR Configurator</h1>
+<div class="d-flex justify-content-between align-items-center">
+    <h1>MiR Configurator</h1>
+    <div>
+        <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-md-6 row">
         <div class="col-sm-4">
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,100,100,100,100)">Add small box</button>
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,200,100,100,150)">Add medium box</button>
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,200,200,300,200)">Add large box</button>
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.1,0.1,0.1,1)">Add small box</button>
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.1,0.1,2)">Add medium box</button>
+            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.2,0.3,4)">Add large box</button>
             <button class="btn btn-outline-danger mt-1" onclick="removeAll2DBoxes()">Remove all boxes</button>
             <button class="btn btn-outline-secondary mt-1" data-bs-toggle="collapse" data-bs-target="#customBoxCollapse">Custom box</button>
             <div class="collapse" id="customBoxCollapse">
@@ -28,20 +34,20 @@
                         <input class="form-control" type="number" id="y" name="y" value="0" placeholder="Enter Y-coordinate">
                     </div>
                     <div>
-                        <label class="form-label" for="width">Width:</label>
-                        <input class="form-control" type="number" id="width" name="width" value="100" placeholder="Enter width">
+                        <label class="form-label" for="width">Width (in meters):</label>
+                        <input class="form-control" type="number" id="width" name="width" value="0.1" placeholder="Enter width">
                     </div>
                     <div>
-                        <label class="form-label" for="length">Length:</label>
-                        <input class="form-control" type="number" id="length" name="length" value="100" placeholder="Enter length">
+                        <label class="form-label" for="length">Length (in meters):</label>
+                        <input class="form-control" type="number" id="length" name="length" value="0.1" placeholder="Enter length">
                     </div>
                     <div>
-                        <label class="form-label" for="height">Height:</label>
-                        <input class="form-control" type="number" id="height" name="height" value="100" placeholder="Enter height">
+                        <label class="form-label" for="height">Height (in meters):</label>
+                        <input class="form-control" type="number" id="height" name="height" value="0.1" placeholder="Enter height">
                     </div>
                     <div>
-                        <label class="form-label" for="weight">Weight:</label>
-                        <input class="form-control" type="number" id="weight" name="weight" value="100" placeholder="Enter weight">
+                        <label class="form-label" for="weight">Weight (in kilogrammes):</label>
+                        <input class="form-control" type="number" id="weight" name="weight" value="4" placeholder="Enter weight">
                     </div>
                     <button class="btn btn-primary mt-1" onclick="callAddBox()">Add Box</button>
                 </div>
@@ -86,12 +92,46 @@
     private double YValue { get; set; } = 0d;
     private double ZValue { get; set; } = 0d;
 
+    private bool IsSendingData { get; set; } = false;
+    private string SubmitButtonText { get; set; } = "Send to simulation";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await jsRuntime.InvokeVoidAsync("startP5Sketch");
-            await threeJs.Initialize(ThreeJsContainerId);
+            await mirConfig.Initialize3DScene(ThreeJsContainerId);
+        }
+    }
+
+    public async Task SubmitBoxes()
+    {
+        if (IsSendingData)
+        {
+            return;
+        }
+
+        IsSendingData = true;
+        SubmitButtonText = "Please wait...";
+        StateHasChanged();
+        try{
+            var boxes = await mirConfig.GetBoxConfiguration();
+            if(boxes.Count == 0)
+            {
+                return;
+            }
+            var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
+            await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
+            await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
+        }catch(Exception e)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Failed to send data to the simulation\n" + e.Message);
+        }
+        finally
+        {
+            IsSendingData = false;
+            SubmitButtonText = "Send to simulation";
+            StateHasChanged();
         }
     }
 

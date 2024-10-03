@@ -193,7 +193,7 @@ function add3DBox(box) {
     let { x, y, z, width, length, height } = box;
     var textureLoader = new THREE.TextureLoader();
     let texture;
-    if (box.weight >= 200) {
+    if (box.weight >= 3) {
         texture = textureLoader.load('/models/heavy_box.png');
     } else {
         texture = textureLoader.load('/models/box.png');
