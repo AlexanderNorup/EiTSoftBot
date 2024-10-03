@@ -26,12 +26,12 @@
         {
             return new GazeboBox(
                 Id: box.Id,
-                X: ((box.Y - (box.Length / 2)) * MiR2DToRealWorldDimentions) - CenterOfMiRLength,
-                Y: ((box.X - (box.Width / 2)) * MiR2DToRealWorldDimentions) - CenterOfMiRWidth,
-                Z: (box.Z - (box.Height / 2)) * MiR2DToRealWorldDimentions,
-                SizeX: box.Length * MiR2DToRealWorldDimentions,
-                SizeY: box.Width * MiR2DToRealWorldDimentions,
-                SizeZ: box.Height * MiR2DToRealWorldDimentions,
+                X: Math.Round((box.Y - (box.Length / 2)) * MiR2DToRealWorldDimentions, 2) - CenterOfMiRLength,
+                Y: Math.Round((box.X - (box.Width / 2)) * MiR2DToRealWorldDimentions, 2) - CenterOfMiRWidth,
+                Z: Math.Round((box.Z + (box.Height / 2)) * MiR2DToRealWorldDimentions, 2),
+                SizeX: Math.Round(box.Length * MiR2DToRealWorldDimentions, 2),
+                SizeY: Math.Round(box.Width * MiR2DToRealWorldDimentions, 2),
+                SizeZ: Math.Round(box.Height * MiR2DToRealWorldDimentions, 2),
                 Weight: box.Weight);
         }
     }

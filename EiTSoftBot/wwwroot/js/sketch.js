@@ -4,8 +4,11 @@ window.startP5Sketch = () => {
 };
 
 window.sketch = (p) => {
+    const MirLength = 760;
+    const MirWidth = 450;
+    const RealWorldScale = 0.89 / MirLength;
 
-    let boxes = [new Box(0, 0, 100, 100, 100, 100)];
+    let boxes = [];
     let dragging = false;
     let currentBox = null;
     let hoverBox = null;
@@ -27,10 +30,12 @@ window.sketch = (p) => {
     }
 
     p.setup = () => {
-        let canvas = p.createCanvas(450, 760); // MIR size: w: 4.5, h: 7.6: 
+        let canvas = p.createCanvas(MirWidth, MirLength); // MIR size: w: 4.5, h: 7.6: 
         canvas.parent("canvasContainer");
         // Call the resize function
         bgImg.resize(p.width, p.height);
+
+        window.addBox(0,0,0.1,0.1,0.1,1); // Add default small box
     };
 
     p.draw = () => {
@@ -40,7 +45,7 @@ window.sketch = (p) => {
     };
 
     window.addBox = (x, y, width, length, height, weight) => {
-        let newBox = new Box(x, y, width, length, height, weight);
+        let newBox = new Box(x / RealWorldScale, y / RealWorldScale, width / RealWorldScale, length / RealWorldScale, height / RealWorldScale, weight);
         boxes.push(newBox);
         handleCollisionCurrentOrNew(newBox, boxes, false);
         sortBoxes(boxes);
@@ -164,12 +169,12 @@ window.sketch = (p) => {
 };
 
 window.callAddBox = () => {
-    const x = parseInt(document.getElementById('x').value);
-    const y = parseInt(document.getElementById('y').value);
-    const width = parseInt(document.getElementById('width').value);
-    const length = parseInt(document.getElementById('length').value);
-    const height = parseInt(document.getElementById('height').value);
-    const weight = parseInt(document.getElementById('weight').value);
+    const x = parseFloat(document.getElementById('x').value);
+    const y = parseFloat(document.getElementById('y').value);
+    const width = parseFloat(document.getElementById('width').value);
+    const length = parseFloat(document.getElementById('length').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
 
     window.addBox(x, y, width, length, height, weight);
 };
