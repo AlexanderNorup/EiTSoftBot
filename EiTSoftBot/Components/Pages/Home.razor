@@ -1,12 +1,17 @@
 ﻿@page "/"
-@inject ThreeJsService threeJs
+@inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
 <PageTitle>MiR Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js"></script>
 </HeadContent>
 
-<h1>MiR Configurator</h1>
+<div class="d-flex justify-content-between align-items-center">
+    <h1>MiR Configurator</h1>
+    <div>
+        <button @onclick="SubmitBoxes" class="btn btn-success">Send to simulation</button>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-md-6 row">
@@ -91,8 +96,14 @@
         if (firstRender)
         {
             await jsRuntime.InvokeVoidAsync("startP5Sketch");
-            await threeJs.Initialize(ThreeJsContainerId);
+            await mirConfig.Initialize3DScene(ThreeJsContainerId);
         }
+    }
+
+    public async Task SubmitBoxes()
+    {
+        var boxes = await mirConfig.GetBoxConfiguration();
+        var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
     }
 
 }

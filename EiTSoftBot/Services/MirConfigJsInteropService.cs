@@ -2,22 +2,27 @@
 
 namespace EiTSoftBot.Services
 {
-    public class ThreeJsService
+    public class MirConfigJsInteropService
     {
         private IJSRuntime _jsRuntime;
-        public ThreeJsService(IJSRuntime jsRuntime)
+        public MirConfigJsInteropService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
         }
 
-        public async Task Initialize(string containerId)
+        public async Task Initialize3DScene(string containerId)
         {
             await _jsRuntime.InvokeVoidAsync("init3DScene", containerId);
         }
 
-        public async Task IsInitialized()
+        public async Task Is3DSceneInitialized()
         {
             await _jsRuntime.InvokeVoidAsync("is3DInitialized");
+        }
+
+        public async Task<List<JsBox>> GetBoxConfiguration()
+        {
+            return await _jsRuntime.InvokeAsync<List<JsBox>>("getAll2DBoxes").ConfigureAwait(false);
         }
     }
 }

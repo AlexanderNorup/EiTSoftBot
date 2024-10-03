@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<ThreeJsService>();
+builder.Services.AddScoped<MirConfigJsInteropService>();
 
 var app = builder.Build();
 

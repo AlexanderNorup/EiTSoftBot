@@ -105,6 +105,10 @@ window.sketch = (p) => {
         dragging = false;
     }
 
+    window.getAll2DBoxes = () => {
+        return boxes;
+    };
+
     p.mousePressed = (event) => {
         if (event.which === 1) {
             dragging = true;
