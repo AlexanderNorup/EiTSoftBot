@@ -1,5 +1,7 @@
 using EiTSoftBot.Components;
 using EiTSoftBot.Services;
+using MQTTnet;
+using MQTTnet.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,19 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<MirConfigJsInteropService>();
+
+builder.Services.AddSingleton((s) =>
+{
+    var mqttClientOptions = new MqttClientOptionsBuilder()
+        .WithTcpServer(builder.Configuration["MqttConfig:MqttHost"])
+        .WithCredentials(builder.Configuration["MqttConfig:MqttUsername"], builder.Configuration["MqttConfig:MqttPassword"])
+        .WithCleanSession()
+        .Build();
+
+    return mqttClientOptions;
+});
+
+builder.Services.AddScoped<SimulatorClient>();
 
 var app = builder.Build();
 

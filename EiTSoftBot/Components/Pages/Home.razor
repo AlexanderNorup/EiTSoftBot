@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
+@inject SimulatorClient simulatorClient
 <PageTitle>MiR Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js"></script>
@@ -104,6 +105,7 @@
     {
         var boxes = await mirConfig.GetBoxConfiguration();
         var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
+        await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
     }
 
 }

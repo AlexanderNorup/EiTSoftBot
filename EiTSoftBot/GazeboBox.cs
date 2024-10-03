@@ -26,8 +26,8 @@
         {
             return new GazeboBox(
                 Id: box.Id,
-                X: Math.Round((box.Y - (box.Length / 2)) * MiR2DToRealWorldDimentions, 2) - CenterOfMiRLength,
-                Y: Math.Round((box.X - (box.Width / 2)) * MiR2DToRealWorldDimentions, 2) - CenterOfMiRWidth,
+                X: Math.Round((box.Y - (box.Length / 2)) * MiR2DToRealWorldDimentions  - CenterOfMiRLength, 2),
+                Y: Math.Round((box.X - (box.Width / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRWidth, 2),
                 Z: Math.Round((box.Z + (box.Height / 2)) * MiR2DToRealWorldDimentions, 2),
                 SizeX: Math.Round(box.Length * MiR2DToRealWorldDimentions, 2),
                 SizeY: Math.Round(box.Width * MiR2DToRealWorldDimentions, 2),
