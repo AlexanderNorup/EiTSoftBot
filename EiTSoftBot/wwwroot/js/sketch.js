@@ -8,6 +8,10 @@ window.sketch = (p) => {
     const MirWidth = 450;
     const RealWorldScale = 0.89 / MirLength;
 
+    window.getRealWorldScale = () => {
+        return RealWorldScale;
+    };
+
     let boxes = [];
     let dragging = false;
     let currentBox = null;

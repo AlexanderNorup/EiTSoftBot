@@ -55,7 +55,9 @@ class Box {
         p.rect(this.x, this.y, this.width, this.length);
         p.fill(0);
         p.stroke(0);
-        p.text(`Z: ${this.z}\nH: ${this.height}`, this.x + 10, this.y + 20);
+        let realWorldH = this.height * window.getRealWorldScale();
+        let realWorldZ = this.z * window.getRealWorldScale();
+        p.text(`Z: ${realWorldZ.toFixed(2)}\nH: ${realWorldH.toFixed(2)}`, this.x + 10, this.y + 20);
 
         if (window.update3DBox !== undefined) {
             window.update3DBox(this);
