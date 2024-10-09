@@ -5,6 +5,7 @@ on:
 
 jobs:
   build:
+    name: Build Docker image
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -32,7 +33,9 @@ jobs:
     environment: eit.app.alexandernorup.com 
     steps:
       - name: Get SSH key
-        run: echo "${{secrets.SSH_KEY}}" >> ssh_key
+        run: | 
+          echo "${{secrets.SSH_KEY}}" >> ssh_key
+          chmod 400 ssh_key
 
       - name: Pull image and restart
         run: ssh -oStrictHostKeyChecking=no -i ssh_key gh_actions@hosting.alexandernorup.com -t 'cd /home/alex/eitsoftbot;docker-compose pull;docker-compose up -d --remove-orphans;docker image prune -f'
