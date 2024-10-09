@@ -35,4 +35,4 @@ jobs:
         run: echo "${{secrets.SSH_KEY}}" >> ssh_key
 
       - name: Pull image and restart
-        run: ssh -i ssh_key gh_actions@hosting.alexandernorup.com -t 'cd /home/alex/eitsoftbot;docker-compose pull;docker-compose up -d --remove-orphans;docker image prune -f'
+        run: ssh -oStrictHostKeyChecking=no -i ssh_key gh_actions@hosting.alexandernorup.com -t 'cd /home/alex/eitsoftbot;docker-compose pull;docker-compose up -d --remove-orphans;docker image prune -f'
