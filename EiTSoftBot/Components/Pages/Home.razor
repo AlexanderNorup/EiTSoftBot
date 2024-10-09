@@ -2,13 +2,13 @@
 @inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
 @inject SimulatorClient simulatorClient
-<PageTitle>MiR Configurator</PageTitle>
+<PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js"></script>
 </HeadContent>
 
 <div class="d-flex justify-content-between align-items-center">
-    <h1>MiR Configurator</h1>
+    <h1>MiR Box Configurator</h1>
     <div>
         <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
     </div>
