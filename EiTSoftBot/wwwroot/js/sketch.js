@@ -39,7 +39,7 @@ window.sketch = (p) => {
         // Call the resize function
         bgImg.resize(p.width, p.height);
 
-        window.addBox(0,0,0.1,0.1,0.1,1); // Add default small box
+        window.addBox(0, 0, 0.1, 0.1, 0.1, 1); // Add default small box
     };
 
     p.draw = () => {
@@ -71,6 +71,7 @@ window.sketch = (p) => {
                 hoverBox.mouseOver = true;
             }
         }
+        window.before3DUpdate();
         boxes.forEach((box) => {
             if (box === currentBox) {
                 handleCollisionCurrentOrNew(box, boxes, snapping);

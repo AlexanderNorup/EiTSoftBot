@@ -126,7 +126,6 @@ window.init3DScene = (divId) => {
     function animate() {
         controls.update();
         composer.render();
-        outlinePass.selectedObjects = [];
     }
 
     window.onresize = function () {
@@ -185,6 +184,10 @@ window.update3DBox = (box) => {
         cube.material.wireframe = false;
     }
 };
+
+window.before3DUpdate = () => {
+    outlinePass.selectedObjects = [];
+}
 
 function add3DBox(box) {
     if (!is3DInitialized()) {
