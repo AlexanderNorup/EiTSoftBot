@@ -39,6 +39,13 @@ let boxMapping = [];
  */
 let outlinePass;
 
+/**
+ * @type {TntAnimation[]}
+ */
+let currentTntAnims = [];
+
+let explosionModel = null;
+
 window.init3DScene = (divId) => {
     let containerDiv = document.getElementById(divId);
     if (containerDiv == null) {
@@ -91,7 +98,6 @@ window.init3DScene = (divId) => {
 
     glbLoader.load('/models/warehouse.glb', function (gltf) {
         const model = gltf.scene;
-        console.log(model);
         model.position.set(-62.5, -3, 150);
         model.scale.set(8, 8, 8);
         model.receiveShadow = true;
@@ -101,6 +107,17 @@ window.init3DScene = (divId) => {
         console.error("Failed to load WareHouse Model: ", e);
     });
 
+    glbLoader.load('/models/explosion.glb', function (gltf) {
+        const model = gltf.scene;
+        model.position.set(0, 1, 0);
+        model.scale.set(2,2,2);
+        model.receiveShadow = true;
+        model.castShadow = false;
+        model.castShadow = false;
+        explosionModel = model;
+    }, undefined, function (e) {
+        console.error("Failed to load Explosion Model: ", e);
+    });
 
     // postprocessing
 
@@ -122,8 +139,21 @@ window.init3DScene = (divId) => {
     const outputPass = new OutputPass();
     composer.addPass(outputPass);
 
+    const clock = new THREE.Clock();
     renderer.setAnimationLoop(animate);
     function animate() {
+        const dt = clock.getDelta();
+        if (currentTntAnims.length > 0) {
+            for (let currentTntAnim of currentTntAnims) {
+                currentTntAnim.update(dt);
+                if (currentTntAnim.isDone) {
+                    scene.remove(currentTntAnim.cube);
+                    scene.remove(currentTntAnim.explosion);
+                    window.removeAll2DBoxes(); // To actually remove the boxes
+                }
+            }
+            currentTntAnims = currentTntAnims.filter(x => !x.isDone);
+        }
         controls.update();
         composer.render();
     }
@@ -188,6 +218,33 @@ window.update3DBox = (box) => {
 window.before3DUpdate = () => {
     outlinePass.selectedObjects = [];
 }
+
+window.do3DRemoveAnimation = () => {
+    var textureLoader = new THREE.TextureLoader();
+    let sideTexture = textureLoader.load('/models/tnt_side.png');
+    let topTexture = textureLoader.load('/models/tnt_top.png');
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const cubeMaterials = [
+        new THREE.MeshBasicMaterial({ map: sideTexture }), //right side
+        new THREE.MeshBasicMaterial({ map: sideTexture }), //left side
+        new THREE.MeshBasicMaterial({ map: topTexture }), //top side
+        new THREE.MeshBasicMaterial({ map: topTexture }), //bottom side
+        new THREE.MeshBasicMaterial({ map: sideTexture }), //front side
+        new THREE.MeshBasicMaterial({ map: sideTexture }), //back side
+    ];
+    const cube = new THREE.Mesh(geometry, cubeMaterials);
+    cube.receiveShadow = true;
+    cube.castShadow = true;
+
+    const explosion = explosionModel.clone(true);
+    explosion.children[0].transparent = true; 
+    explosion.visible = false;
+
+    scene.add(cube);
+    scene.add(explosion);
+    let newAnim = new TntAnimation(cube, explosion);
+    currentTntAnims.push(newAnim);
+};
 
 function add3DBox(box) {
     if (!is3DInitialized()) {
