@@ -6,7 +6,7 @@ window.startP5Sketch = () => {
 window.sketch = (p) => {
     const MirLength = 760;
     const MirWidth = 450;
-    const RealWorldScale = 0.89 / MirLength;
+    const RealWorldScale = 0.757276 / MirLength;
     const selectedBoxPropertyEditContainer = document.getElementById('selectedBoxEditContainer');
     const selectedBoxWeightInput = document.getElementById('selectedWeightInput');
 
