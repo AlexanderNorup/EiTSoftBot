@@ -28,6 +28,7 @@ window.sketch = (p) => {
     let highlightBox = null;
     let snapping = true;
     let snappingFactor = 50;
+    let shiftPressed = false;
 
     window.changeSnapping = () => {
         snapping = document.getElementById('snapping').checked;
@@ -135,6 +136,14 @@ window.sketch = (p) => {
         dragging = false;
     }
 
+    window.removeAllBoxes = () => {
+        if (shiftPressed) {
+            window.do3DRemoveAnimation();
+        } else {
+            window.removeAll2DBoxes();
+        }
+    };
+
     window.getAll2DBoxes = () => {
         return boxes;
     };
@@ -180,19 +189,21 @@ window.sketch = (p) => {
             for (var box of boxesToDelete) {
                 window.remove2DBox(box.id);
             }
-        }
-        if (p.key === "Alt") {
+        } else if (p.key === "Alt") {
             snapping = false;
-        }
-        if (p.key == "Escape") {
+        } else if (p.key == "Escape") {
             removeHighlight(boxes);
             highlightBox = null;
+        } else if (p.key == "Shift") {
+            shiftPressed = true;
         }
     };
 
     p.keyReleased = () => {
         if (p.key === "Alt") {
             changeSnapping();
+        } else if (p.key == "Shift") {
+            shiftPressed = false;
         }
     }
 };
