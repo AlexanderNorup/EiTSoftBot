@@ -117,6 +117,7 @@ window.sketch = (p) => {
 
     window.remove2DBox = (id) => {
         removeHighlight(boxes);
+        highlightBox = null;
         boxes = boxes.filter((box) => box.id !== id);
         mouseReleaseCollision(boxes);
         window.remove3DBox(id);
@@ -124,6 +125,7 @@ window.sketch = (p) => {
 
     window.removeAll2DBoxes = () => {
         removeHighlight(boxes);
+        highlightBox = null;
         for (let box of boxes) {
             window.remove3DBox(box.id);
         }

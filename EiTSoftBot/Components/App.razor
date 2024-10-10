@@ -10,17 +10,17 @@
     <!-- Toastify -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script type="text/javascript" src="/js/toastInterop.js"></script>
+    <script type="text/javascript" src="/js/toastInterop.js?v=@Version"></script>
 
-    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="app.css?v=@Version" />
     <link rel="stylesheet" href="EiTSoftBot.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
 
     <script src="/libraries/p5js/p5.min.js"></script>
     <script src="/libraries/p5js/p5.sound.min.js"></script>
-    <script type="text/javascript" src="/js/utils.js"></script>
-    <script type="text/javascript" src="/js/box.js"></script>
-    <script type="text/javascript" src="/js/TntAnimation.js"></script>
+    <script type="text/javascript" src="/js/utils.js?v=@Version"></script>
+    <script type="text/javascript" src="/js/box.js?v=@Version"></script>
+    <script type="text/javascript" src="/js/TntAnimation.js?v=@Version"></script>
     <script type="importmap">
         {
           "imports": {
@@ -39,3 +39,7 @@
 </body>
 
 </html>
+
+@code {
+    string Version = File.GetLastWriteTimeUtc(typeof(App).Assembly.Location).Ticks.ToString();
+}

@@ -4,7 +4,7 @@
 @inject SimulatorClient simulatorClient
 <PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
-    <script type="module" src="/js/threeJsInterop.js"></script>
+    <script type="module" src="/js/threeJsInterop.js?v=@(Version)"></script>
 </HeadContent>
 
 <div class="d-flex justify-content-between align-items-center">
@@ -110,9 +110,10 @@
 </div>
 
 
-<script defer type="text/javascript" src="/js/sketch.js"></script>
+<script defer type="text/javascript" src="/js/sketch.js?v=@(Version)"></script>
 
 @code {
+    string Version = File.GetLastWriteTimeUtc(typeof(App).Assembly.Location).Ticks.ToString();
     private const string ThreeJsContainerId = "3dContainer";
 
     private double XValue { get; set; } = 0d;
