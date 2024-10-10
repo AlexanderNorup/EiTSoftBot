@@ -15,8 +15,10 @@
         double SizeZ, // = Height
         double Weight)
     {
-        public const double MiRLength = 0.89; // Meters
-        public const double MiRWidth = 0.58; // Meters
+        public const double MiRHeight = 0.36; // Meters
+        public const double MiRLength = 0.757276; // Meters
+        public const double MiRWidth = 0.440944; // Meters
+        public const double MiRXOffset = 0.045; // Meters
         public const double CenterOfMiRLength = MiRLength / 2;
         public const double CenterOfMiRWidth = MiRWidth / 2;
 
@@ -26,12 +28,12 @@
         {
             return new GazeboBox(
                 Id: box.Id,
-                X: Math.Round((box.Y - (box.Length / 2)) * MiR2DToRealWorldDimentions  - CenterOfMiRLength, 2),
-                Y: Math.Round((box.X - (box.Width / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRWidth, 2),
-                Z: Math.Round((box.Z + (box.Height / 2)) * MiR2DToRealWorldDimentions, 2),
-                SizeX: Math.Round(box.Length * MiR2DToRealWorldDimentions, 2),
-                SizeY: Math.Round(box.Width * MiR2DToRealWorldDimentions, 2),
-                SizeZ: Math.Round(box.Height * MiR2DToRealWorldDimentions, 2),
+                X: Math.Round(((box.Y + (box.Length / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRLength) + MiRXOffset, 3),
+                Y: Math.Round((box.X + (box.Width / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRWidth, 3),
+                Z: Math.Round(((box.Z + (box.Height / 2)) * MiR2DToRealWorldDimentions) + MiRHeight, 3),
+                SizeX: Math.Round(box.Length * MiR2DToRealWorldDimentions, 3),
+                SizeY: Math.Round(box.Width * MiR2DToRealWorldDimentions, 3),
+                SizeZ: Math.Round(box.Height * MiR2DToRealWorldDimentions, 3),
                 Weight: box.Weight);
         }
     }
