@@ -7,6 +7,14 @@ window.sketch = (p) => {
     const MirLength = 760;
     const MirWidth = 450;
     const RealWorldScale = 0.89 / MirLength;
+    const selectedBoxPropertyEditContainer = document.getElementById('selectedBoxEditContainer');
+    const selectedBoxWeightInput = document.getElementById('selectedWeightInput');
+
+    selectedBoxWeightInput.addEventListener("change", () => {
+        if (highlightBox != null) {
+            highlightBox.weight = parseFloat(selectedBoxWeightInput.value);
+        }
+    })
 
     window.getRealWorldScale = () => {
         return RealWorldScale;
@@ -46,6 +54,12 @@ window.sketch = (p) => {
         p.image(bgImg, 0, 0);
         sortBoxes(boxes);
         drawBoxes();
+
+        if (highlightBox != null) {
+            selectedBoxPropertyEditContainer.style.display = "block";
+        } else {
+            selectedBoxPropertyEditContainer.style.display = "none";
+        }
     };
 
     window.addBox = (x, y, width, length, height, weight) => {
@@ -91,9 +105,13 @@ window.sketch = (p) => {
                 return box.id === id;
             })
             box.highlight = true;
+            highlightBox = box;
+            selectedBoxWeightInput.value = box.weight;
         } else {
             let box = id;
             box.highlight = true;
+            highlightBox = box;
+            selectedBoxWeightInput.value = box.weight;
         }
     };
 
@@ -148,7 +166,7 @@ window.sketch = (p) => {
         mouseReleaseCollision(boxes);
         if (currentBox != null) {
             currentBox.dragging = false;
-            currentBox.highlight = true;
+            window.highlight2DBox(currentBox);
             currentBox = null;
         }
         dragging = false;
@@ -163,6 +181,10 @@ window.sketch = (p) => {
         }
         if (p.key === "Alt") {
             snapping = false;
+        }
+        if (p.key == "Escape") {
+            removeHighlight(boxes);
+            highlightBox = null;
         }
     };
 

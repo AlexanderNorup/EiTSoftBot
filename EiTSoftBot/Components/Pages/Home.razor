@@ -17,11 +17,25 @@
 <div class="row">
     <div class="col-md-6 row">
         <div class="col-sm-4">
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.1,0.1,0.1,1)">Add small box</button>
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.1,0.1,2)">Add medium box</button>
-            <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.2,0.3,4)">Add large box</button>
-            <button class="btn btn-outline-danger mt-1" onclick="removeAll2DBoxes()">Remove all boxes</button>
-            <button class="btn btn-outline-secondary mt-1" data-bs-toggle="collapse" data-bs-target="#customBoxCollapse">Custom box</button>
+            <div class="card mb-2" style="width: 100%;display:none;" id="selectedBoxEditContainer">
+                <div class="bg-success text-white card-header">
+                    Properties of selected box
+                </div>
+                <div class="card-body">
+                    <div>
+                        <label class="form-label" for="selectedWeightInput">Weight (kg):</label>
+                        <input class="form-control" type="number" id="selectedWeightInput" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.1,0.1,0.1,1)">Add small box</button>
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.1,0.1,2)">Add medium box</button>
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.2,0.3,4)">Add large box</button>
+                <button class="btn btn-outline-danger mt-1" onclick="removeAll2DBoxes()">Remove all boxes</button>
+                <button class="btn btn-outline-secondary mt-1" data-bs-toggle="collapse" data-bs-target="#customBoxCollapse">Custom box</button>
+            </div>
             <div class="collapse" id="customBoxCollapse">
                 <div class="card card-body mt-2">
                     <h4>Enter Box Dimensions</h4>
@@ -52,19 +66,32 @@
                     <button class="btn btn-primary mt-1" onclick="callAddBox()">Add Box</button>
                 </div>
             </div>
-            <div>
-                <h2>Snapping</h2>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="snapping" onchange="changeSnapping()" checked>
-                    <label class="form-check-label" for="snapping">
-                        Snapping
-                    </label>
-                </div>
-                <div>
-                    <label class="form-label" for="snappingFactor">Snapping Factor:</label>
-                    <input class="form-control" type="number" id="snappingFactor" name="snappingFactor" value="50" placeholder="Enter snapping factor" onchange="changeSnappingFactor()">
+            <hr />
+
+            <div class="accordion" id="settingsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSnapping" aria-expanded="false" aria-controls="collapseSnapping">
+                            Snapping
+                        </button>
+                    </h2>
+                    <div id="collapseSnapping" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="snapping" onchange="changeSnapping()" checked>
+                                <label class="form-check-label" for="snapping">
+                                    Snapping
+                                </label>
+                            </div>
+                            <div>
+                                <label class="form-label" for="snappingFactor">Snapping Factor:</label>
+                                <input class="form-control" type="number" id="snappingFactor" name="snappingFactor" value="50" placeholder="Enter snapping factor" onchange="changeSnappingFactor()">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
         <div class="col-sm-8" id="canvasContainer">
         </div>
@@ -114,16 +141,18 @@
         IsSendingData = true;
         SubmitButtonText = "Please wait...";
         StateHasChanged();
-        try{
+        try
+        {
             var boxes = await mirConfig.GetBoxConfiguration();
-            if(boxes.Count == 0)
+            if (boxes.Count == 0)
             {
                 return;
             }
             var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
             await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
             await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
-        }catch(Exception e)
+        }
+        catch (Exception e)
         {
             await jsRuntime.InvokeVoidAsync("alert", "Failed to send data to the simulation\n" + e.Message);
         }
