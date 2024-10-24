@@ -110,7 +110,7 @@ window.init3DScene = (divId) => {
     glbLoader.load('/models/explosion.glb', function (gltf) {
         const model = gltf.scene;
         model.position.set(0, 1, 0);
-        model.scale.set(2,2,2);
+        model.scale.set(2, 2, 2);
         model.receiveShadow = true;
         model.castShadow = false;
         model.castShadow = false;
@@ -216,6 +216,9 @@ window.update3DBox = (box) => {
 };
 
 window.before3DUpdate = () => {
+    if (outlinePass === undefined) {
+        return;
+    }
     outlinePass.selectedObjects = [];
 }
 
@@ -237,7 +240,7 @@ window.do3DRemoveAnimation = () => {
     cube.castShadow = true;
 
     const explosion = explosionModel.clone(true);
-    explosion.children[0].transparent = true; 
+    explosion.children[0].transparent = true;
     explosion.visible = false;
 
     scene.add(cube);
