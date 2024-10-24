@@ -16,8 +16,8 @@ password = input("Input mqtt password: ").strip()
 client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 
 # Change path below
-#mainPath = "../../../catkin_ws/src/mir_robot/mir_gazebo"
-mainPath = "./temp"
+mainPath = "../../../../catkin_ws/src/mir_robot/mir_gazebo"
+#mainPath = "./temp"
 
 
 def connect_mqtt():
@@ -50,7 +50,7 @@ def handle_payload(payload):
         i += 1
         write_box(i, box)
     # Uncomment below to make the script load boxes into simulator. With this still commented, it only creates the files
-    #load_into_simulation(i)
+    load_into_simulation(i)
     return
 
 def write_box(i, box):
@@ -71,7 +71,7 @@ def write_box(i, box):
     p2_data = box['Z']
     p = [p0_data,p1_data,p2_data]
 
-    mu1=0.54
+    mu1=0.54 #0.54
     mu2=0.32
 
     sdfPrint.writeSdf(mainPath + "/sdf/box" + str(i) + "/model.sdf",p,w,s,mu1,mu2)
