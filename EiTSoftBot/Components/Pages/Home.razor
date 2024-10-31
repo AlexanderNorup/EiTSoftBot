@@ -24,6 +24,9 @@
         </select>
     </div>
     <div>
+        <button @onclick="simulatorClient.RequestMissionsAsync">REQUEST</button>
+    </div>
+    <div>
         <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
     </div>
 </div>
@@ -157,6 +160,7 @@
         if (message is GetAllMissionsResponse response)
         {
             _missions = response.Missions;
+            _ = InvokeAsync(StateHasChanged);
         }
     }
 
