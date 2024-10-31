@@ -2,6 +2,11 @@
 @inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
 @inject SimulatorClient simulatorClient
+@using EiTSoftBot.Dto
+@using EiTSoftBot.Dto.Entities
+@using EiTSoftBot.Dto.Requests
+@using EiTSoftBot.Dto.Responses
+@implements IDisposable
 <PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js?v=@(Version)"></script>
@@ -9,6 +14,18 @@
 
 <div class="d-flex justify-content-between align-items-center">
     <h1>MiR Box Configurator</h1>
+    <div>
+        <select class="form-select" id="missionSelect" @bind="_selectedMissionID">
+            <option>Choose mission</option>
+            @foreach (var mission in _missions)
+            {
+                <option value="@mission.Id">@mission.Name</option>
+            }
+        </select>
+    </div>
+    <div>
+        <button @onclick="simulatorClient.RequestMissionsAsync">REQUEST</button>
+    </div>
     <div>
         <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
     </div>
@@ -115,6 +132,8 @@
 @code {
     string Version = File.GetLastWriteTimeUtc(typeof(App).Assembly.Location).Ticks.ToString();
     private const string ThreeJsContainerId = "3dContainer";
+    private List<Mission> _missions = new();
+    private String _selectedMissionID;
 
     private double XValue { get; set; } = 0d;
     private double YValue { get; set; } = 0d;
@@ -127,8 +146,21 @@
     {
         if (firstRender)
         {
+            _missions = TemporaryMissions();
+            StateHasChanged();
             await jsRuntime.InvokeVoidAsync("startP5Sketch");
             await mirConfig.Initialize3DScene(ThreeJsContainerId);
+            await simulatorClient.OpenConnectionAsync();
+            simulatorClient.OnMessageRecieved += SimulatorClientOnOnMessageRecieved;
+        }
+    }
+
+    private void SimulatorClientOnOnMessageRecieved(BaseMessage message)
+    {
+        if (message is GetAllMissionsResponse response)
+        {
+            _missions = response.Missions;
+            _ = InvokeAsync(StateHasChanged);
         }
     }
 
@@ -150,6 +182,7 @@
                 return;
             }
             var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
+            // TODO: also send mission with _selectedMissionID
             await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
             await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
         }
@@ -165,4 +198,21 @@
         }
     }
 
+    public void Dispose()
+    {
+        simulatorClient.OnMessageRecieved -= SimulatorClientOnOnMessageRecieved;
+    }
+
+    private List<Mission> TemporaryMissions()
+    {
+        var ms = new List<Mission>();
+        ms.Add(new Mission("1", "ALPHA", null));
+        ms.Add(new Mission("2", "BETA", null));
+        ms.Add(new Mission("3", "GAMMA", null));
+        ms.Add(new Mission("4", "DELTA", null));
+        ms.Add(new Mission("5", "EPSILON", null));
+        ms.Add(new Mission("6", "ZETA", null));
+        ms.Add(new Mission("7", "ETA", null));
+        return ms;
+    }
 }
