@@ -2,6 +2,7 @@
 @inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
 @inject SimulatorClient simulatorClient
+@implements IDisposable
 <PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
     <script type="module" src="/js/threeJsInterop.js?v=@(Version)"></script>
@@ -129,7 +130,14 @@
         {
             await jsRuntime.InvokeVoidAsync("startP5Sketch");
             await mirConfig.Initialize3DScene(ThreeJsContainerId);
+            await simulatorClient.OpenConnectionAsync();
+            simulatorClient.OnMessageRecieved += SimulatorClientOnOnMessageRecieved;
         }
+    }
+
+    private void SimulatorClientOnOnMessageRecieved(string obj)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task SubmitBoxes()
@@ -163,6 +171,11 @@
             SubmitButtonText = "Send to simulation";
             StateHasChanged();
         }
+    }
+
+    public void Dispose()
+    {
+        simulatorClient.OnMessageRecieved -= SimulatorClientOnOnMessageRecieved;
     }
 
 }
