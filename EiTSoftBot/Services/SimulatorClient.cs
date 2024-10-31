@@ -1,6 +1,9 @@
-﻿using MQTTnet;
+﻿using System.Text;
+using MQTTnet;
 using MQTTnet.Client;
 using System.Text.Json;
+using EiTSoftBot.Dto;
+using EiTSoftBot.Dto.Requests;
 
 namespace EiTSoftBot.Services
 {
@@ -14,15 +17,19 @@ namespace EiTSoftBot.Services
             _client = new MqttFactory().CreateMqttClient();
             await _client.ConnectAsync(_mqttClientOptions);
             
-            await _client.SubscribeAsync("PLACEHOLDER");
+            await _client.SubscribeAsync(_config["MqttConfig:MqttResponseTopic"]);
 
             _client.ApplicationMessageReceivedAsync += (e) =>
             {
-                //_missions = e.ApplicationMessage.PayloadSegment
-                // TODO: Pack and parse message
-
-                var message = "hello world";
-                OnMessageRecieved.Invoke(message);
+                try
+                {
+                    var rawMessage = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                    var message = RequestSerializer.Deserialize(rawMessage);
+                    OnMessageRecieved.Invoke(message);
+                }
+                catch (Exception exception)
+                {
+                }
                 return Task.CompletedTask;
             };
         }
@@ -40,12 +47,12 @@ namespace EiTSoftBot.Services
         {
             await OpenConnectionAsync();
             await _client.PublishAsync(new MqttApplicationMessageBuilder()
-                .WithTopic("PLACEHOLDER")
-                .WithPayload("gib missions pls")
+                .WithTopic(_config["MqttConfig:MqttRequestTopic"])
+                .WithPayload(RequestSerializer.Serialize(new GetAllMissionsRequest()))
                 .Build());
             }
         
-        public event Action<string> OnMessageRecieved;
+        public event Action<BaseMessage> OnMessageRecieved;
         public void Dispose()
         {
             _client?.Dispose();
