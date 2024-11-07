@@ -21,8 +21,7 @@ jobs:
         
     - name: Build and push the Docker image
       run: | 
-        cd EiTSoftBot
-        docker build -t ghcr.io/alexandernorup/eitsoftbot/web:${{ github.sha }} .
+        docker build -f EiTSoftBot/Dockerfile -t ghcr.io/alexandernorup/eitsoftbot/web:${{ github.sha }} .
         docker tag ghcr.io/alexandernorup/eitsoftbot/web:${{ github.sha }} ghcr.io/alexandernorup/eitsoftbot/web:latest
         docker push ghcr.io/alexandernorup/eitsoftbot/web --all-tags 
 

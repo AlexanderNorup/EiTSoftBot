@@ -1,0 +1,5 @@
+./**/bin/
+./**/obj/
+simulation/
+.vs/
+.git/
