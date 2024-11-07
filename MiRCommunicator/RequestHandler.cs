@@ -25,6 +25,13 @@ namespace MiRCommunicator
                 case GetAllMissionsRequest getAllMissionsRequest:
                     await HandleGetAllMissionsRequest(getAllMissionsRequest);
                     break;
+                case PingRequest pingRequest:
+                    await SendResponse(new PingResponse()
+                    {
+                        PingId = pingRequest.PingId,
+                        Source = "MiRCommunicator"
+                    });
+                    break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Unknown reques type: {baseMessage.GetType().Name}");

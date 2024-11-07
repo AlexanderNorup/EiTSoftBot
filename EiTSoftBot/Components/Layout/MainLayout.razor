@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using EiTSoftBot.Dto
+@using EiTSoftBot.Dto.Responses
+@inherits LayoutComponentBase
+@inject SimulatorClient client
+@inject ConnectionMonitor monitor
+@implements IDisposable
 
 <div class="page">
     <main>
@@ -17,6 +22,11 @@
                             <a class="nav-link" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">About</a>
                         </li>
                     </ul>
+                    <span class="bg-white rounded px-2 pe-none">
+                        MiR Connected: <span class="@(monitor.MirConnected ? "text-success" : "text-danger")">@monitor.MirConnected</span> | Sim Connected: <span class="@(monitor.SimulatorConnected ? "text-success" : "text-danger")">@monitor.SimulatorConnected</span>
+
+                        <i class="bi bi-arrow-clockwise ms-1" style="cursor: pointer;" @onclick="monitor.RefreshState"></i>
+                    </span>
                 </div>
             </div>
         </nav>
@@ -32,3 +42,25 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        client.OnMessageRecieved += OnMessage;
+    }
+
+    public void OnMessage(BaseMessage msg)
+    {
+        if(msg is RefreshStateMessage)
+        {
+            _ = InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        // Clean up
+        client.OnMessageRecieved -= OnMessage;
+    }
+}

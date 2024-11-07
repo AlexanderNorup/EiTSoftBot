@@ -155,11 +155,18 @@
         }
     }
 
+    private bool MirConnected { get; set; } = false;
+    private bool SimulationConnected { get; set; } = false;
+
+    private async Task RefreshClientConnections()
+    {
+        (MirConnected, SimulationConnected) = await simulatorClient.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
+    }
+
     private void SimulatorClientOnOnMessageRecieved(BaseMessage message)
     {
         if (message is GetAllMissionsResponse response)
         {
-            _missions = response.Missions;
             _ = InvokeAsync(StateHasChanged);
         }
     }
@@ -181,7 +188,7 @@
             {
                 return;
             }
-            var gazeboBoxes = boxes.Select(GazeboBox.FromJsBox).ToList();
+            var gazeboBoxes = boxes.Select(x=>x.AsGazeboBox()).ToList();
             // TODO: also send mission with _selectedMissionID
             await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
             await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");

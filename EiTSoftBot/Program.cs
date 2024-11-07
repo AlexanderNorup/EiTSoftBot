@@ -22,7 +22,9 @@ builder.Services.AddSingleton((s) =>
     return mqttClientOptions;
 });
 
-builder.Services.AddScoped<SimulatorClient>();
+builder.Services.AddSingleton<SimulatorClient>();
+builder.Services.AddSingleton<MissionRepository>();
+builder.Services.AddSingleton<ConnectionMonitor>();
 
 var app = builder.Build();
 
