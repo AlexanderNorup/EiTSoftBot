@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+COPY ["EiTSoftBot.Dto/", "EiTSoftBot.Dto/"]
 COPY EiTSoftBot.csproj .
 RUN dotnet restore
 COPY . .
