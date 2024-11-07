@@ -1,15 +1,10 @@
 import random
-import time
-import os
-import shutil
 from typing import List
-import configPrint
-import sdfPrint
-import spawner
 import json
 from paho.mqtt import client as mqtt_client
 from helperObjects import Box, Waypoint
 from threading import Thread
+import signal
 
 broker = 'hosting.alexandernorup.com'
 port = 1883
@@ -140,6 +135,14 @@ def deserializeWaypoint(jsonWaypoint) -> Waypoint:
 
 def run():
     client = connect_mqtt(client_id)
+
+    def closing(signum, frame):
+        print("Goodbye ):")
+        client.disconnect()
+        exit(1)
+    
+    signal.signal(signal.SIGINT, closing)
+
     subscribe(client)
     client.loop_forever()
         
