@@ -90,9 +90,11 @@ def deserializeBox(jsonBox) -> Box:
 
 def deserializeWaypoint(jsonWaypoint) -> Waypoint:
     return Waypoint(
-        jsonWaypoint['UUID'],
+        jsonWaypoint['Id'],
+        jsonWaypoint['Name'],
         jsonWaypoint['X'],
         jsonWaypoint['Y'],
+        jsonWaypoint['Rotation'],
         jsonWaypoint['Speed']
     )
 
