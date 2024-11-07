@@ -3,15 +3,21 @@ using EiTSoftBot.Dto.Entities;
 using EiTSoftBot.Dto.Requests;
 using EiTSoftBot.Dto.Responses;
 using MiR200RestClient;
+using MiR200RestClient.Entities;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace MiRCommunicator
 {
     internal class RequestHandler(IMqttClient mqttClient, MirCommunicatorConfig config)
     {
+        private MiRRestClient _mirClient = new MiRRestClient(config.MirApiEndpoint, config.MirApiUsername, config.MirApipassword);
+        private SemaphoreSlim _positionSemaphore = new SemaphoreSlim(1, 1);
+        private ConcurrentDictionary<string, RestPosition> _positionCache = new ConcurrentDictionary<string, RestPosition>();
+
         public async Task HandleRequestAsync(BaseMessage baseMessage)
         {
             switch (baseMessage)
@@ -29,45 +35,40 @@ namespace MiRCommunicator
 
         private async Task HandleGetAllMissionsRequest(GetAllMissionsRequest getAllMissionsRequest)
         {
-            var missionClient = new MissionsClient();
-            if (!string.IsNullOrWhiteSpace(config.MirApiEndpoint))
-            {
-                missionClient.BaseUrl = config.MirApiEndpoint;
-            }
-
             var response = new GetAllMissionsResponse();
-            // FOR TESTING, please ignore
-            //response.Missions = new List<Mission>()
-            //{
-            //    new Mission(Guid.NewGuid().ToString(), "Best mission", new List<MirAction>()
-            //    {
-            //        new MirAction("Action1", "move", "I don't know what will be in this parameter"),
-            //        new MirAction("Action2", "set_speed", "I don't know what will be in this parameter"),
-            //        new MirAction("Action3", "move", "I don't know what will be in this parameter"),
-            //    }),
-            //    new Mission(Guid.NewGuid().ToString(), "Wow very nice mission", new List<MirAction>()
-            //    {
-            //        new MirAction("Action1", "move", "I don't know what will be in this parameter"),
-            //        new MirAction("Action2", "set_speed", "I don't know what will be in this parameter"),
-            //        new MirAction("Action3", "move", "I don't know what will be in this parameter"),
-            //    }),
-            //    new Mission(Guid.NewGuid().ToString(), "THE BEST MISSION", new List<MirAction>()
-            //    {
-            //        new MirAction("Action1", "go_home", "I don't know what will be in this parameter"),
-            //    }),
-            //};
-
-            var allMissions = await missionClient.MissionsAll2Async(0, AcceptLanguage.En_US);
+            var allMissions = await _mirClient.GetMissionsForSessionAsync(config.MirSessionId).ConfigureAwait(false);
             foreach (var mission in allMissions)
             {
-                List<MirAction> responseActions = new();
-                var actions = await missionClient.ActionsAllAsync(0, AcceptLanguage.En_US, mission.Guid);
-                foreach (var action in actions)
+                List<Waypoint> responseWaypoints = new();
+                var actions = await _mirClient.GetActionsForMissionAsync(mission.Guid).ConfigureAwait(false);
+                double? currentSpeed = null;
+                foreach (var action in actions.OrderBy(x => x.Priority))
                 {
-                    responseActions.Add(new MirAction(action.Guid, action.Action_type, action.Parameters));
+                    if (action.ActionType == "move")
+                    {
+                        var positionParam = action.Parameters.FirstOrDefault(x => x.Id == "position");
+                        if (positionParam is null)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Position parameter missing in move action");
+                            Console.ResetColor();
+                            continue;
+                        }
+                        var position = await GetPositionAsync(positionParam.Value);
+                        responseWaypoints.Add(new Waypoint(action.Guid, position.Name, position.PosX, position.PosY, position.Orientation, currentSpeed));
+                    }
+                    else if (action.ActionType == "planner_settings")
+                    {
+                        var speedParameter = action.Parameters.FirstOrDefault(x => x.Id == "desired_speed");
+                        if (speedParameter is not null
+                            && double.TryParse(speedParameter.Value, out var newCurrentSpeed))
+                        {
+                            currentSpeed = newCurrentSpeed;
+                        }
+                    }
                 }
 
-                response.Missions.Add(new Mission(mission.Guid, mission.Name, responseActions));
+                response.Missions.Add(new Mission(mission.Guid, mission.Name, responseWaypoints));
             }
 
             await SendResponse(response);
@@ -85,6 +86,31 @@ namespace MiRCommunicator
 
             Console.WriteLine($"Sending response of type: {response.GetType().Name}");
             await mqttClient.PublishAsync(responseMessage);
+        }
+
+        private async Task<RestPosition> GetPositionAsync(string positionId)
+        {
+            if (_positionCache.TryGetValue(positionId, out var position))
+            {
+                return position;
+            }
+
+            await _positionSemaphore.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (_positionCache.TryGetValue(positionId, out position))
+                {
+                    return position;
+                }
+
+                var newPos = await _mirClient.GetPosition(positionId).ConfigureAwait(false);
+                _positionCache.TryAdd(positionId, newPos);
+                return newPos;
+            }
+            finally
+            {
+                _positionSemaphore.Release();
+            }
         }
     }
 }

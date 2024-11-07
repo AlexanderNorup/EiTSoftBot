@@ -19,6 +19,16 @@ namespace MiRCommunicator
         [Required]
         public string MqttHost { get; set; } = string.Empty;
 
-        public string? MirApiEndpoint { get; set; }
+        [Required]
+        public string MirApiEndpoint { get; set; } = "http://mir.com/api/v2.0.0";
+
+        [Required]
+        public string MirApiUsername { get; set; } = "admin";
+
+        [Required]
+        public string MirApipassword { get; set; } = "admin";
+
+        [Required]
+        public string MirSessionId { get; set; } = string.Empty;
     }
 }
