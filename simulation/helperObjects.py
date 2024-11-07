@@ -12,10 +12,12 @@ class Box:
 
 
 class Waypoint:
-    __slots__ = ['uuid', 'x', 'y', 'speed']
+    __slots__ = ['id', 'name', 'x', 'y', 'rotation', 'speed']
 
-    def __init__(self, uuid: str, x: float, y: float,  speed: float) -> None:
-        self.uuid = uuid
+    def __init__(self, id: str, name: str, x: float, y: float, rotation: float, speed: float) -> None:
+        self.id = id
+        self.name = name
         self.x = x
         self.y = y
+        self.rotation = rotation
         self.speed = speed
