@@ -9,16 +9,20 @@ import spawner
 import json
 from paho.mqtt import client as mqtt_client
 from helperObjects import Box, Waypoint
+from threading import Thread
 
 broker = 'hosting.alexandernorup.com'
 port = 1883
 topic = 'eit'
+response_topic = 'eit_response'
+client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
+client_response_id = f'eit-mir-sim-{random.randint(0, 1000)}'
+
 username = 'eit'
 password = input("Input mqtt password: ").strip()
-client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 
 
-def connect_mqtt():
+def connect_mqtt(client_id):
     def on_connect(client, userdata, flags, rc, properties):
         if rc == 0:
             print("Connected to MQTT Broker!")
@@ -36,10 +40,42 @@ def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
         print("Recieved message")
         data = json.loads(msg.payload.decode())
-        handle_payload(client, data)
+        if 'MessageName' not in data:
+            print("Message does not contain MessageName")
+            return
+        
+        if data['MessageName'] == 'PingRequest':
+            # Cannot publish with the same client while we "loop_forever", as that would block consuming events, or something along those lines. 
+            # Therefore we do a different thread and use a different client. 
+            # This also blocks (because of join()) but python is weird like that. This works
+            thread = Thread(target=publishPing, args=(data,))
+            thread.start()
+            thread.join()
+        elif data['MessageName'] == 'SimulationStartRequest':
+            handle_payload(client, data)
 
     client.subscribe(topic)
     client.on_message = on_message
+
+
+def publishPing(data):
+    client = connect_mqtt(client_response_id)
+    data = {
+        '$type':'EiTSoftBot.Dto.Responses.PingResponse, EiTSoftBot.Dto',
+        'MessageName': 'PingResponse',
+        'PingId': data['PingId'],
+        'Source': 'Simulation'
+    }
+    msg = json.dumps(data)
+    result = client.publish(response_topic, msg)
+    status = result[0]
+    if status == 0:
+        print(f"Sent `{msg}` to topic `{response_topic}`")
+    else:
+        print(f"Failed to send message to topic {response_topic}")
+    client.disconnect()
+    return
+    
 
 
 def publishMission(client: mqtt_client, waypoints: List[Waypoint], maxAcceleration: float):
@@ -49,18 +85,21 @@ def publishMission(client: mqtt_client, waypoints: List[Waypoint], maxAccelerati
         "Waypoints": jsonWaypoints
     }
     msg = json.dumps(data)
-    result = client.publish(topic, msg)
+    result = client.publish(response_topic, msg)
     status = result[0]
     if status == 0:
-        print(f"Sent `{msg}` to topic `{topic}`")
+        print(f"Sent `{msg}` to topic `{response_topic}`")
     else:
-        print(f"Failed to send message to topic {topic}")
+        print(f"Failed to send message to topic {response_topic}")
 
 
 def handle_payload(client: mqtt_client, payload):
-    boxes = [deserializeBox(jsonBox) for jsonBox in payload['Boxes']]
-    waypoints = [deserializeWaypoint(jsonWaypoint) for jsonWaypoint in payload['Waypoints']]
+    boxes = [deserializeBox(jsonBox) for jsonBox in payload['Boxes']['$values']]
+    #waypoints = [deserializeWaypoint(jsonWaypoint) for jsonWaypoint in payload['Waypoints']['$values']]
 
+    print(boxes)
+
+    
     # Load these into simulation
     # Get result of simulation (update waypoints and get max acceleration)
     # publishMission(client, waypoints, maxAcceleration)
@@ -100,7 +139,7 @@ def deserializeWaypoint(jsonWaypoint) -> Waypoint:
 
 
 def run():
-    client = connect_mqtt()
+    client = connect_mqtt(client_id)
     subscribe(client)
     client.loop_forever()
         
