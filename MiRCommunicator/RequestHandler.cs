@@ -8,13 +8,14 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Text;
 
 namespace MiRCommunicator
 {
     internal class RequestHandler(IMqttClient mqttClient, MirCommunicatorConfig config)
     {
-        private MiRRestClient _mirClient = new MiRRestClient(config.MirApiEndpoint, config.MirApiUsername, config.MirApipassword);
+        private MiRRestClient _mirClient = new MiRRestClient(config.MirApiEndpoint, config.MirApiToken);
         private SemaphoreSlim _positionSemaphore = new SemaphoreSlim(1, 1);
         private ConcurrentDictionary<string, RestPosition> _positionCache = new ConcurrentDictionary<string, RestPosition>();
 
@@ -68,7 +69,7 @@ namespace MiRCommunicator
                     {
                         var speedParameter = action.Parameters.FirstOrDefault(x => x.Id == "desired_speed");
                         if (speedParameter is not null
-                            && double.TryParse(speedParameter.Value, out var newCurrentSpeed))
+                            && double.TryParse(speedParameter.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var newCurrentSpeed))
                         {
                             currentSpeed = newCurrentSpeed;
                         }

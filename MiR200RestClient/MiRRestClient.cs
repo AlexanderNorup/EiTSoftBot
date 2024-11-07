@@ -13,14 +13,14 @@ namespace MiR200RestClient
     public class MiRRestClient : IDisposable
     {
         private readonly HttpClient _httpClient;
-        public MiRRestClient(string baseAddress, string username, string password)
+        public MiRRestClient(string baseAddress, string token)
         {
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(baseAddress),
                 DefaultRequestHeaders =
                 {
-                    Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}")))
+                    Authorization = new AuthenticationHeaderValue("Basic", token)
                 }
             };
         }

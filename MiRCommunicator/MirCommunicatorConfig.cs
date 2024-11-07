@@ -23,10 +23,7 @@ namespace MiRCommunicator
         public string MirApiEndpoint { get; set; } = "http://mir.com/api/v2.0.0";
 
         [Required]
-        public string MirApiUsername { get; set; } = "admin";
-
-        [Required]
-        public string MirApipassword { get; set; } = "admin";
+        public string MirApiToken { get; set; } = "admin";
 
         [Required]
         public string MirSessionId { get; set; } = string.Empty;

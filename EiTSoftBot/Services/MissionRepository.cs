@@ -38,6 +38,7 @@ namespace EiTSoftBot.Services
                     var json = await File.ReadAllTextAsync(MissionCachePath);
                     _missions = JsonSerializer.Deserialize<List<Mission>>(json)
                         ?? throw new InvalidDataException("Json Deserialized to null");
+                    _logger.LogInformation("Loaded {Count} missions from mission cache", _missions.Count);
                 }
                 else
                 {
@@ -52,6 +53,10 @@ namespace EiTSoftBot.Services
 
         public async Task PersistToCache()
         {
+            if (_missions is null || _missions.Count <= 0)
+            {
+                return;
+            }
             try
             {
                 var directory = Path.GetDirectoryName(MissionCachePath);

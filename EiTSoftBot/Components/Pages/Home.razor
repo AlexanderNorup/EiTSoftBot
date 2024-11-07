@@ -134,8 +134,8 @@
 @code {
     string Version = File.GetLastWriteTimeUtc(typeof(App).Assembly.Location).Ticks.ToString();
     private const string ThreeJsContainerId = "3dContainer";
-    private List<Mission> _missions = new();
-    private String _selectedMissionID;
+    private bool _fecthedRealMissions = false;
+    private string _selectedMissionID;
 
     private double XValue { get; set; } = 0d;
     private double YValue { get; set; } = 0d;
@@ -148,12 +148,12 @@
     {
         if (firstRender)
         {
-            _missions = TemporaryMissions();
             StateHasChanged();
             await jsRuntime.InvokeVoidAsync("startP5Sketch");
             await mirConfig.Initialize3DScene(ThreeJsContainerId);
             await simulatorClient.OpenConnectionAsync();
             simulatorClient.OnMessageRecieved += SimulatorClientOnOnMessageRecieved;
+            await RefreshMissions();
         }
     }
 
@@ -162,11 +162,16 @@
         if (message is GetAllMissionsResponse)
         {
             _ = missionRepo.PersistToCache();
+            _fecthedRealMissions = true;
             _ = InvokeAsync(StateHasChanged);
         }
         else if (message is RefreshStateMessage)
         {
             _ = InvokeAsync(StateHasChanged);
+            if(!_fecthedRealMissions && monitor.MirConnected)
+            {
+                _ = RefreshMissions();
+            }
         }
     }
 
@@ -219,18 +224,5 @@
     public void Dispose()
     {
         simulatorClient.OnMessageRecieved -= SimulatorClientOnOnMessageRecieved;
-    }
-
-    private List<Mission> TemporaryMissions()
-    {
-        var ms = new List<Mission>();
-        ms.Add(new Mission("1", "ALPHA", null));
-        ms.Add(new Mission("2", "BETA", null));
-        ms.Add(new Mission("3", "GAMMA", null));
-        ms.Add(new Mission("4", "DELTA", null));
-        ms.Add(new Mission("5", "EPSILON", null));
-        ms.Add(new Mission("6", "ZETA", null));
-        ms.Add(new Mission("7", "ETA", null));
-        return ms;
     }
 }
