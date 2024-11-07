@@ -2,6 +2,8 @@
 @inject MirConfigJsInteropService mirConfig
 @inject IJSRuntime jsRuntime
 @inject SimulatorClient simulatorClient
+@inject ConnectionMonitor monitor
+@inject MissionRepository missionRepo
 @using EiTSoftBot.Dto
 @using EiTSoftBot.Dto.Entities
 @using EiTSoftBot.Dto.Requests
@@ -14,20 +16,20 @@
 
 <div class="d-flex justify-content-between align-items-center">
     <h1>MiR Box Configurator</h1>
-    <div>
+
+    <div class="d-flex align-items-center">
         <select class="form-select" id="missionSelect" @bind="_selectedMissionID">
             <option>Choose mission</option>
-            @foreach (var mission in _missions)
+            @foreach (var mission in missionRepo.Missions)
             {
                 <option value="@mission.Id">@mission.Name</option>
             }
         </select>
-    </div>
-    <div>
-        <button @onclick="simulatorClient.RequestMissionsAsync">REQUEST</button>
-    </div>
-    <div>
-        <button @onclick="SubmitBoxes" class="btn btn-success" disabled="@IsSendingData">@SubmitButtonText</button>
+
+
+        <i class="bi bi-arrow-clockwise ms-1" style="cursor: pointer;" @onclick="RefreshMissions"></i>
+
+        <button @onclick="SubmitBoxes" class="btn btn-success ms-2" style="min-width: 17rem;" disabled="@(IsSendingData || !monitor.SimulatorConnected)">@SubmitButtonText</button>
     </div>
 </div>
 
@@ -155,19 +157,28 @@
         }
     }
 
-    private bool MirConnected { get; set; } = false;
-    private bool SimulationConnected { get; set; } = false;
-
-    private async Task RefreshClientConnections()
-    {
-        (MirConnected, SimulationConnected) = await simulatorClient.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
-    }
-
     private void SimulatorClientOnOnMessageRecieved(BaseMessage message)
     {
-        if (message is GetAllMissionsResponse response)
+        if (message is GetAllMissionsResponse)
+        {
+            _ = missionRepo.PersistToCache();
+            _ = InvokeAsync(StateHasChanged);
+        }
+        else if (message is RefreshStateMessage)
         {
             _ = InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public async Task RefreshMissions()
+    {
+        if (monitor.MirConnected)
+        {
+            await simulatorClient.RequestMissionsAsync();
+        }else
+        {
+            await missionRepo.LoadFromCache();
+            StateHasChanged();
         }
     }
 

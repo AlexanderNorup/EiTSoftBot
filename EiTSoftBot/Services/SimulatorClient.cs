@@ -46,7 +46,7 @@ namespace EiTSoftBot.Services
             await OpenConnectionAsync();
             await _client.PublishAsync(new MqttApplicationMessageBuilder()
                 .WithTopic(_config["MqttConfig:MqttTopic"])
-                .WithPayload(RequestSerializer.Serialize(boxes))
+                .WithPayload(RequestSerializer.Serialize(simulationStartRequest))
                 .Build());
         }
 

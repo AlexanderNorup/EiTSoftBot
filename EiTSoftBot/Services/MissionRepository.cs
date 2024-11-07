@@ -52,13 +52,14 @@ namespace EiTSoftBot.Services
 
         public async Task PersistToCache()
         {
-            var directory = Path.GetDirectoryName(MissionCachePath);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory!);
-            }
             try
             {
+                var directory = Path.GetDirectoryName(MissionCachePath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory!);
+                }
+
                 var json = JsonSerializer.Serialize(_missions);
                 await File.WriteAllTextAsync(MissionCachePath, json);
                 _logger.LogInformation("Missions persisted to cache => {File}", MissionCachePath);
