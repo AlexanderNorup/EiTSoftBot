@@ -60,6 +60,20 @@ namespace EiTSoftBot.Services
                 .Build());
         }
 
+        public async Task SetMissionAsync(Mission adjustedMission, double? newMaxAccel)
+        {
+            var setMissionRequest = new SetMissionRequest()
+            {
+                Mission = adjustedMission,
+                MaxAcceleration = newMaxAccel,
+            };
+            await OpenConnectionAsync();
+            await _client.PublishAsync(new MqttApplicationMessageBuilder()
+                .WithTopic(_config["MqttConfig:MqttRequestTopic"])
+                .WithPayload(RequestSerializer.Serialize(new GetAllMissionsRequest()))
+                .Build());
+        }
+
         public async Task<(bool mirConnectorConnected, bool mirConnected, bool simulationConnected)> GetOtherClientConnectionStatus(TimeSpan timeout)
         {
             var waitingFor = Guid.NewGuid().ToString();

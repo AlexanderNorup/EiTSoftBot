@@ -8,6 +8,7 @@
 @using EiTSoftBot.Dto.Entities
 @using EiTSoftBot.Dto.Requests
 @using EiTSoftBot.Dto.Responses
+@using System.Text.Json
 @implements IDisposable
 <PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
@@ -128,6 +129,47 @@
     </div>
 </div>
 
+@if (_simulationEndResponse is {} simResponse){
+
+    <hr/>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Simulation response</h2>
+
+            <div>
+                <p>Raw response:
+                    <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions(){WriteIndented = true})</pre>
+                </p>
+            </div>
+
+            @if (IsSendingData)
+            {
+                <p>Sending data to MiR</p>
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+            }
+
+            @if(_sentToMirSuccessfully is { } success)
+            {
+                <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+                  <div class="card-header">MiR Status</div>
+                  <div class="card-body">
+                    <h5 class="card-title">@(success ? "Successfully updated the MiR" : "Failed to update the MiR")</h5>
+                  </div>
+                </div>  
+            }
+
+            <div>
+                <button class="btn btn-success" disabled="@(!monitor.MirConnected || IsSendingData)" @onclick="UpdateMirWithSimResponse">Send to MiR</button>
+                <button class="btn btn-danger ms-2" @onclick="ResetSimResult">Clear simulation response</button>
+            </div>
+        </div>
+    </div>
+
+}
+
 
 <script defer type="text/javascript" src="/js/sketch.js?v=@(Version)"></script>
 
@@ -136,6 +178,8 @@
     private const string ThreeJsContainerId = "3dContainer";
     private bool _fecthedRealMissions = false;
     private string? _selectedMissionID;
+    private SimulationEndResponse? _simulationEndResponse;
+    private bool? _sentToMirSuccessfully;
 
     private double XValue { get; set; } = 0d;
     private double YValue { get; set; } = 0d;
@@ -163,6 +207,12 @@
         {
             _ = missionRepo.PersistToCache();
             _fecthedRealMissions = true;
+            _ = InvokeAsync(StateHasChanged);
+        }
+        else if(message is SimulationEndResponse simEnd)
+        {
+            _simulationEndResponse = simEnd;
+            _sentToMirSuccessfully = null;
             _ = InvokeAsync(StateHasChanged);
         }
         else if (message is RefreshStateMessage)
@@ -223,6 +273,38 @@
             IsSendingData = false;
             SubmitButtonText = "Send to simulation";
             StateHasChanged();
+        }
+    }
+
+    public void ResetSimResult()
+    {
+        _sentToMirSuccessfully = null;
+        _simulationEndResponse = null;
+    }
+
+    public async Task UpdateMirWithSimResponse()
+    {
+        if(_simulationEndResponse is null || IsSendingData)
+        {
+            return;
+        }
+
+        IsSendingData = true;
+        _sentToMirSuccessfully = null;
+        StateHasChanged();
+        try
+        {
+            await simulatorClient.SetMissionAsync(_simulationEndResponse.Mission, _simulationEndResponse.MaxAcceleration).ConfigureAwait(false);
+            _sentToMirSuccessfully = true;
+        }
+        catch (Exception e)
+        {
+            _sentToMirSuccessfully = false;
+            await jsRuntime.InvokeVoidAsync("alert", "Failed to send data to the MiR\n" + e.Message);
+        }
+        finally
+        {
+            IsSendingData = false;
         }
     }
 

@@ -105,7 +105,6 @@ namespace MiRCommunicator
             await SendResponse(response);
         }
 
-
         private async Task HandleSetMissionRequest(SetMissionRequest setMissionRequest)
         {
             try
