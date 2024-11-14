@@ -27,7 +27,7 @@ namespace MiRCommunicator
             IsRefreshing = true;
             try
             {
-                var status = await client.GetStatus(TimeSpan.FromSeconds(1));
+                var status = await client.GetStatusAsync(TimeSpan.FromSeconds(1));
 
                 if (status is not null)
                 {

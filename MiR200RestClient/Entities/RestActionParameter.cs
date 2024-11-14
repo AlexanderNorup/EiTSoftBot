@@ -14,6 +14,6 @@ namespace MiR200RestClient.Entities
         public object InputName { get; set; }
 
         [JsonProperty("value", NullValueHandling = NullValueHandling.Ignore)]
-        public string Value { get; set; }
+        public object Value { get; set; }
     }
 }

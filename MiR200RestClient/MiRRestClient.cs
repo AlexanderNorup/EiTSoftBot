@@ -50,7 +50,23 @@ namespace MiR200RestClient
             return await DeserializeAsync<List<RestMissionAction>>(response.Content);
         }
 
-        public async Task<RestPosition> GetPosition(string positionId)
+        public async Task<bool> AddActionToMissionAsync(string missionId, RestMissionAction newAction)
+        {
+            string requestUri = $"missions/{missionId}/actions";
+            var response = await _httpClient.PostAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newAction))).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteActionFromMission(string missionId, string actionId)
+        {
+            string requestUri = $"missions/{missionId}/actions/{actionId}";
+            var response = await _httpClient.DeleteAsync(requestUri).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<RestPosition> GetPositionAsync(string positionId)
         {
             string requestUri = $"positions/{positionId}";
             var response = await _httpClient.GetAsync(requestUri).ConfigureAwait(false);
@@ -58,7 +74,7 @@ namespace MiR200RestClient
             return await DeserializeAsync<RestPosition>(response.Content);
         }
 
-        public async Task<RestStatus> GetStatus(TimeSpan? timeout = null)
+        public async Task<RestStatus> GetStatusAsync(TimeSpan? timeout = null)
         {
             string requestUri = $"status";
             var cts = new CancellationTokenSource();
@@ -71,12 +87,20 @@ namespace MiR200RestClient
             return await DeserializeAsync<RestStatus>(response.Content);
         }
 
-        public async Task<RestStatus> SetStatus(RestStatusSet newStatus)
+        public async Task<RestStatus> SetStatusAsync(RestStatusSet newStatus)
         {
             string requestUri = $"status";
             var response = await _httpClient.PutAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newStatus))).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             return await DeserializeAsync<RestStatus>(response.Content);
+        }
+
+        public async Task<bool> SetAccelerationAsync(RestSettingSet newAccel)
+        {
+            const string requestUri = "/settings/2076";
+            var response = await _httpClient.PutAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newAccel))).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
         }
 
         private async static Task<T> DeserializeAsync<T>(HttpContent content)

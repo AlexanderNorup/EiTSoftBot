@@ -8,7 +8,6 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Text;
 
 namespace MiRCommunicator
@@ -45,6 +44,9 @@ namespace MiRCommunicator
                         Source = "MiRCommunicator"
                     });
                     break;
+                case SetMissionRequest setMissionRequest:
+                    await HandleSetMissionRequest(setMissionRequest);
+                    break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Unknown reques type: {baseMessage.GetType().Name}");
@@ -74,21 +76,23 @@ namespace MiRCommunicator
                     if (action.ActionType == "move")
                     {
                         var positionParam = action.Parameters.FirstOrDefault(x => x.Id == "position");
-                        if (positionParam is null)
+                        if (positionParam is null
+                            || positionParam.Value is not string)
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine("Position parameter missing in move action");
                             Console.ResetColor();
                             continue;
                         }
-                        var position = await GetPositionAsync(positionParam.Value);
+
+                        var position = await GetPositionAsync((string)positionParam.Value);
                         responseWaypoints.Add(new Waypoint(action.Guid, position.Name, position.PosX, position.PosY, position.Orientation, currentSpeed));
                     }
                     else if (action.ActionType == "planner_settings")
                     {
                         var speedParameter = action.Parameters.FirstOrDefault(x => x.Id == "desired_speed");
                         if (speedParameter is not null
-                            && double.TryParse(speedParameter.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var newCurrentSpeed))
+                            && speedParameter.Value is double newCurrentSpeed)
                         {
                             currentSpeed = newCurrentSpeed;
                         }
@@ -102,6 +106,104 @@ namespace MiRCommunicator
         }
 
 
+        private async Task HandleSetMissionRequest(SetMissionRequest setMissionRequest)
+        {
+            try
+            {
+
+                if (!_monitor.MirConnected)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("MiR is not connected, cannot set mission");
+                    Console.ResetColor();
+                    return;
+                }
+
+                Console.WriteLine("Starting new Mission Set Request. Pausing MiR");
+                await _mirClient.SetStatusAsync(new RestStatusSet()
+                {
+                    StateId = MirState.Paused
+                }).ConfigureAwait(false);
+
+                var mission = setMissionRequest.Mission;
+                var actions = await _mirClient.GetActionsForMissionAsync(mission.Id).ConfigureAwait(false);
+                Console.WriteLine("Found mission on MiR. Deleting old actions");
+                foreach (var action in actions)
+                {
+                    // If this goes well, this can be done concurrently
+                    await _mirClient.DeleteActionFromMission(mission.Id, action.Guid).ConfigureAwait(false);
+                }
+                Console.WriteLine("Writing new actions");
+
+                int i = 0;
+                foreach (var waypoint in mission.Waypoints)
+                {
+                    if (waypoint.Speed is { } speed)
+                    {
+                        var speedAction = new RestMissionAction()
+                        {
+                            Priority = i++,
+                            Guid = Guid.NewGuid().ToString(),
+                            ActionType = "planner_settings",
+                            Parameters = new()
+                        {
+                            new RestActionParameter()
+                            {
+                                Id = "planner_params",
+                                Value = "desired_speed_key"
+                            },
+                            new RestActionParameter()
+                            {
+                                Id = "desired_speed",
+                                Value = speed
+                            }
+                        }
+                        };
+                        await _mirClient.AddActionToMissionAsync(mission.Id, speedAction).ConfigureAwait(false);
+                    }
+
+                    var moveAction = new RestMissionAction()
+                    {
+                        Priority = i++,
+                        ActionType = "move",
+                        Guid = Guid.NewGuid().ToString(),
+                        Parameters = new()
+                    {
+                        new RestActionParameter()
+                        {
+                            Id = "position",
+                            Value = waypoint.Id
+                        }
+                    }
+                    };
+                    await _mirClient.AddActionToMissionAsync(mission.Id, moveAction).ConfigureAwait(false);
+                }
+
+                Console.WriteLine($"Wrote {i} actions to MiR");
+
+                if (setMissionRequest.MaxAcceleration is { } maxAccel)
+                {
+                    Console.WriteLine($"Setting max acceleration to {maxAccel}");
+                    await _mirClient.SetAccelerationAsync(new RestSettingSet()
+                    {
+                        Value = maxAccel
+                    }).ConfigureAwait(false);
+                }
+
+                await SendResponse(new SetMissionResponse()
+                {
+                    Success = true
+                });
+            }
+            catch (Exception)
+            {
+                await SendResponse(new SetMissionResponse()
+                {
+                    Success = false
+                });
+                throw;
+            }
+        }
         private async Task SendResponse(BaseMessage response)
         {
             var responseJson = RequestSerializer.Serialize(response);
@@ -130,7 +232,7 @@ namespace MiRCommunicator
                     return position;
                 }
 
-                var newPos = await _mirClient.GetPosition(positionId).ConfigureAwait(false);
+                var newPos = await _mirClient.GetPositionAsync(positionId).ConfigureAwait(false);
                 _positionCache.TryAdd(positionId, newPos);
                 return newPos;
             }
