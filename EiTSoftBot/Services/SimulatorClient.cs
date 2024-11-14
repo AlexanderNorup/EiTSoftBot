@@ -60,7 +60,7 @@ namespace EiTSoftBot.Services
                 .Build());
         }
 
-        public async Task SetMissionAsync(Mission adjustedMission, double? newMaxAccel)
+        public async Task SetMissionAsync(Mission adjustedMission, int? newMaxAccel)
         {
             var setMissionRequest = new SetMissionRequest()
             {
@@ -70,15 +70,25 @@ namespace EiTSoftBot.Services
             await OpenConnectionAsync();
             await _client.PublishAsync(new MqttApplicationMessageBuilder()
                 .WithTopic(_config["MqttConfig:MqttRequestTopic"])
-                .WithPayload(RequestSerializer.Serialize(new GetAllMissionsRequest()))
+                .WithPayload(RequestSerializer.Serialize(setMissionRequest))
                 .Build());
         }
 
-        public async Task<(bool mirConnectorConnected, bool mirConnected, bool simulationConnected)> GetOtherClientConnectionStatus(TimeSpan timeout)
+        public async Task SetMirStatusAsync(bool ready)
+        {
+            await OpenConnectionAsync();
+            await _client.PublishAsync(new MqttApplicationMessageBuilder()
+                .WithTopic(_config["MqttConfig:MqttRequestTopic"])
+                .WithPayload(RequestSerializer.Serialize(new SetMirStatusRequest() { Ready = ready }))
+                .Build());
+        }
+
+        public async Task<ConnectionStatus> GetOtherClientConnectionStatus(TimeSpan timeout)
         {
             var waitingFor = Guid.NewGuid().ToString();
             bool mirConnectorAlive = false;
             bool mirAlive = false;
+            int? mirStatus = null;
             bool simAlive = false;
             Action<BaseMessage> listener = (e) =>
             {
@@ -89,6 +99,7 @@ namespace EiTSoftBot.Services
                     {
                         mirConnectorAlive = true;
                         mirAlive = ping.MiRConnected == true;
+                        mirStatus = ping.MirStatus;
                     }
                     else if (ping.Source == "Simulation")
                     {
@@ -123,7 +134,7 @@ namespace EiTSoftBot.Services
                     if (mirConnectorAlive && simAlive)
                     {
                         logger.LogDebug("Both Mir and Sim alive!");
-                        return (true, mirAlive, true);
+                        return new ConnectionStatus(true, mirAlive, mirStatus, true);
                     }
                     await Task.Delay(100).ConfigureAwait(false);
                 }
@@ -138,7 +149,7 @@ namespace EiTSoftBot.Services
             }
 
             logger.LogDebug("MiR Connector Alive: {MirConnectorAlive}, MiR Alive: {MirAlive} , Sim Alive: {SimAlive}", mirConnectorAlive, mirAlive, simAlive);
-            return (mirConnectorAlive, mirAlive, simAlive);
+            return new ConnectionStatus(mirConnectorAlive, mirAlive, mirStatus, simAlive);
         }
 
         internal void SimulateRecieveMessage(BaseMessage msg)
@@ -152,4 +163,9 @@ namespace EiTSoftBot.Services
             _client?.Dispose();
         }
     }
+
+    public record ConnectionStatus(bool mirConnectorConnected,
+        bool mirConnected,
+        int? mirStatus,
+        bool simulationConnected);
 }

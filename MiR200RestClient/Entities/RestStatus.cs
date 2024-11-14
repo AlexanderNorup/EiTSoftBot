@@ -11,13 +11,13 @@ namespace MiR200RestClient.Entities
         public StatusVelocity Velocity { get; set; }
 
         [JsonProperty("battery_time_remaining", NullValueHandling = NullValueHandling.Ignore)]
-        public int BatteryTimeRemaining { get; set; }
+        public double BatteryTimeRemaining { get; set; }
 
         [JsonProperty("battery_percentage", NullValueHandling = NullValueHandling.Ignore)]
-        public int BatteryPercentage { get; set; }
+        public double BatteryPercentage { get; set; }
 
         [JsonProperty("moved", NullValueHandling = NullValueHandling.Ignore)]
-        public int Moved { get; set; }
+        public double Moved { get; set; }
 
         [JsonProperty("mission_queue_id", NullValueHandling = NullValueHandling.Ignore)]
         public int MissionQueueId { get; set; }
@@ -29,7 +29,7 @@ namespace MiR200RestClient.Entities
         public string MissionText { get; set; }
 
         [JsonProperty("distance_to_next_target", NullValueHandling = NullValueHandling.Ignore)]
-        public int DistanceToNextTarget { get; set; }
+        public double DistanceToNextTarget { get; set; }
 
         [JsonProperty("robot_name", NullValueHandling = NullValueHandling.Ignore)]
         public string RobotName { get; set; }
@@ -79,22 +79,22 @@ namespace MiR200RestClient.Entities
         public class StatusPosition
         {
             [JsonProperty("x", NullValueHandling = NullValueHandling.Ignore)]
-            public int X { get; set; }
+            public double X { get; set; }
 
             [JsonProperty("y", NullValueHandling = NullValueHandling.Ignore)]
-            public int Y { get; set; }
+            public double Y { get; set; }
 
             [JsonProperty("orientation", NullValueHandling = NullValueHandling.Ignore)]
-            public int Orientation { get; set; }
+            public double Orientation { get; set; }
         }
 
         public class StatusVelocity
         {
             [JsonProperty("linear", NullValueHandling = NullValueHandling.Ignore)]
-            public int Linear { get; set; }
+            public double Linear { get; set; }
 
             [JsonProperty("angular", NullValueHandling = NullValueHandling.Ignore)]
-            public int Angular { get; set; }
+            public double Angular { get; set; }
         }
 
     }

@@ -56,7 +56,7 @@
         {
             return monitor switch
             {
-                { MirConnectorConnected: true, MirConnected: true } => "text-sucess",
+                { MirConnectorConnected: true, MirConnected: true } => "text-success",
                 { MirConnectorConnected: true, MirConnected: false } => "text-warning",
                 _ => "text-danger"
             };
@@ -71,7 +71,7 @@
                 { MirConnectorConnected: true, MirConnected: false } => "Connector Only",
                 { MirConnectorConnected: false, MirConnected: false } => "False",
                 _ => "Unknown"
-            };
+            } + (monitor.MirConnected ? $" ({monitor.MirStatusString})" : "");
         }
     }
 

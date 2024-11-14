@@ -10,5 +10,6 @@
         /// When the MiRCcommunicator responds, we want to know if a MiR is actually connected
         /// </summary>
         public bool? MiRConnected { get; set; }
+        public int? MirStatus { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MiR200RestClient.Entities;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text;
 
 namespace MiR200RestClient
@@ -18,9 +19,8 @@ namespace MiR200RestClient
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(baseAddress),
-                DefaultRequestHeaders =
-                {
-                    Authorization = new AuthenticationHeaderValue("Basic", token)
+                DefaultRequestHeaders = {
+                    Authorization = new AuthenticationHeaderValue("Basic", token),
                 }
             };
         }
@@ -37,7 +37,7 @@ namespace MiR200RestClient
                     new(SessionIdField, "=", sessionId)
                 }
             })).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAndLog(response);
             return await DeserializeAsync<List<RestMission>>(response.Content);
         }
 
@@ -46,15 +46,15 @@ namespace MiR200RestClient
             string requestUri = $"missions/{missionId}/actions";
 
             var response = await _httpClient.GetAsync(requestUri).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAndLog(response);
             return await DeserializeAsync<List<RestMissionAction>>(response.Content);
         }
 
         public async Task<bool> AddActionToMissionAsync(string missionId, RestMissionAction newAction)
         {
             string requestUri = $"missions/{missionId}/actions";
-            var response = await _httpClient.PostAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newAction))).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            var response = await _httpClient.PostAsync(requestUri, Serialize(newAction)).ConfigureAwait(false);
+            await EnsureSuccessAndLog(response);
             return response.IsSuccessStatusCode;
         }
 
@@ -62,7 +62,7 @@ namespace MiR200RestClient
         {
             string requestUri = $"missions/{missionId}/actions/{actionId}";
             var response = await _httpClient.DeleteAsync(requestUri).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAndLog(response);
             return response.IsSuccessStatusCode;
         }
 
@@ -70,7 +70,7 @@ namespace MiR200RestClient
         {
             string requestUri = $"positions/{positionId}";
             var response = await _httpClient.GetAsync(requestUri).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAndLog(response);
             return await DeserializeAsync<RestPosition>(response.Content);
         }
 
@@ -83,23 +83,23 @@ namespace MiR200RestClient
                 cts.CancelAfter(timeout.Value);
             }
             var response = await _httpClient.GetAsync(requestUri, cts.Token).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAndLog(response);
             return await DeserializeAsync<RestStatus>(response.Content);
         }
 
         public async Task<RestStatus> SetStatusAsync(RestStatusSet newStatus)
         {
             string requestUri = $"status";
-            var response = await _httpClient.PutAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newStatus))).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            var response = await _httpClient.PutAsync(requestUri, Serialize(newStatus)).ConfigureAwait(false);
+            await EnsureSuccessAndLog(response);
             return await DeserializeAsync<RestStatus>(response.Content);
         }
 
         public async Task<bool> SetAccelerationAsync(RestSettingSet newAccel)
         {
-            const string requestUri = "/settings/2076";
-            var response = await _httpClient.PutAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newAccel))).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            const string requestUri = "settings/2076";
+            var response = await _httpClient.PutAsync(requestUri, Serialize(newAccel)).ConfigureAwait(false);
+            await EnsureSuccessAndLog(response);
             return response.IsSuccessStatusCode;
         }
 
@@ -124,8 +124,25 @@ namespace MiR200RestClient
             }
         }
 
+        private async static Task EnsureSuccessAndLog(HttpResponseMessage response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Got {response.StatusCode} on request {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri}: {response.ReasonPhrase}");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+                Console.ResetColor();
+            }
+            response.EnsureSuccessStatusCode();
+        }
+
         private static HttpContent Serialize(object o)
         {
+            Console.WriteLine("Sending request");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine(JsonConvert.SerializeObject(o));
+            Console.ResetColor();
             return new StringContent(
                 JsonConvert.SerializeObject(o),
                 Encoding.UTF8,

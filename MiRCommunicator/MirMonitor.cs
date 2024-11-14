@@ -16,6 +16,7 @@ namespace MiRCommunicator
         }
 
         public bool MirConnected { get; private set; }
+        public int MirStatus { get; private set; } = -1;
         private bool IsRefreshing { get; set; }
 
         public async Task RefreshState()
@@ -32,11 +33,13 @@ namespace MiRCommunicator
                 if (status is not null)
                 {
                     MirConnected = true;
+                    MirStatus = status.StateId;
                 }
             }
             catch (Exception e) when (e is OperationCanceledException or HttpRequestException)
             {
                 MirConnected = false;
+                MirStatus = -1;
             }
             finally
             {

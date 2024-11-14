@@ -161,8 +161,13 @@
                 </div>  
             }
 
+            <p>Current MiR status: <code>@monitor.MirStatusString</code></p>
+
             <div>
-                <button class="btn btn-success" disabled="@(!monitor.MirConnected || IsSendingData)" @onclick="UpdateMirWithSimResponse">Send to MiR</button>
+                <button class="btn btn-primary" disabled="@(!monitor.MirConnected || IsSendingData)" @onclick="UpdateMirWithSimResponse">Send to MiR</button>
+
+                <button class="btn btn-success ms-2" @onclick="() => SetMirStatus(true)">Start MiR</button>
+                <button class="btn btn-warning ms-2" @onclick="() => SetMirStatus(false)">Pause MiR</button>
                 <button class="btn btn-danger ms-2" @onclick="ResetSimResult">Clear simulation response</button>
             </div>
         </div>
@@ -274,6 +279,12 @@
             SubmitButtonText = "Send to simulation";
             StateHasChanged();
         }
+    }
+
+    public async Task SetMirStatus(bool ready)
+    {
+        await simulatorClient.SetMirStatusAsync(ready).ConfigureAwait(false);
+        await monitor.RefreshState();
     }
 
     public void ResetSimResult()

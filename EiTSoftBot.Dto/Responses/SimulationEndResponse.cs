@@ -6,6 +6,6 @@ namespace EiTSoftBot.Dto.Responses
     {
         public override string MessageName => nameof(SimulationEndResponse);
         public required Mission Mission { get; set; }
-        public double MaxAcceleration { get; set; } = 1.0d;
+        public int MaxAcceleration { get; set; } = 100;
     }
 }

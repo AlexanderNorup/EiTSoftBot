@@ -1,4 +1,5 @@
 ﻿using EiTSoftBot.Dto.Responses;
+using MQTTnet.Client;
 
 namespace EiTSoftBot.Services
 {
@@ -17,8 +18,18 @@ namespace EiTSoftBot.Services
 
         public bool MirConnectorConnected { get; private set; }
         public bool MirConnected { get; private set; }
+        public int MirStatus { get; private set; } = -1;
         public bool SimulatorConnected { get; private set; }
         private bool IsRefreshing { get; set; }
+
+        public string MirStatusString => MirStatus switch
+        {
+            3 => "Ready",
+            4 => "Paused",
+            10 => "Emergency Stop",
+            12 => "Manual Control",
+            _ => "Unknown"
+        };
 
         public async Task RefreshState()
         {
@@ -29,15 +40,17 @@ namespace EiTSoftBot.Services
             IsRefreshing = true;
             try
             {
-                (var newMirConnector, var newMir, var newSim) = await client.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
+                var status = await client.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
 
-                if (newMirConnector != MirConnectorConnected
-                    || newMir != MirConnected
-                    || newSim != SimulatorConnected)
+                if (status.mirConnectorConnected != MirConnectorConnected
+                    || status.mirConnected != MirConnected
+                    || status.mirStatus != MirStatus
+                    || status.simulationConnected != SimulatorConnected)
                 {
-                    MirConnectorConnected = newMirConnector;
-                    MirConnected = newMir;
-                    SimulatorConnected = newSim;
+                    MirConnectorConnected = status.mirConnectorConnected;
+                    MirConnected = status.mirConnected;
+                    MirStatus = status.mirStatus ?? -1;
+                    SimulatorConnected = status.simulationConnected;
                     client.SimulateRecieveMessage(new RefreshStateMessage());
                 }
             }

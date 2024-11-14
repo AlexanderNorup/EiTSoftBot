@@ -6,6 +6,6 @@ namespace EiTSoftBot.Dto.Requests
     {
         public override string MessageName => nameof(SetMissionRequest);
         public required Mission Mission { get; set; }
-        public double? MaxAcceleration { get; set; }
+        public int? MaxAcceleration { get; set; }
     }
 }
