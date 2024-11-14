@@ -26,6 +26,7 @@ namespace EiTSoftBot.Services
         {
             3 => "Ready",
             4 => "Paused",
+            5 => "Running",
             10 => "Emergency Stop",
             12 => "Manual Control",
             _ => "Unknown"

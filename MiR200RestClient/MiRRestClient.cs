@@ -1,7 +1,6 @@
 ﻿using MiR200RestClient.Entities;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Text;
 
 namespace MiR200RestClient
@@ -103,6 +102,22 @@ namespace MiR200RestClient
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<bool> AddMissionToQueueAsync(RestMissionQueueEntry newEntry)
+        {
+            const string requestUri = "mission_queue";
+            var response = await _httpClient.PostAsync(requestUri, Serialize(newEntry)).ConfigureAwait(false);
+            await EnsureSuccessAndLog(response);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> ClearMissionQueueAsync()
+        {
+            const string requestUri = "mission_queue";
+            var response = await _httpClient.DeleteAsync(requestUri).ConfigureAwait(false);
+            await EnsureSuccessAndLog(response);
+            return response.IsSuccessStatusCode;
+        }
+
         private async static Task<T> DeserializeAsync<T>(HttpContent content)
         {
             await content.LoadIntoBufferAsync().ConfigureAwait(false); // So we can potentially read the content multiple times in case of exceptions (where we'd like logging)
@@ -139,10 +154,6 @@ namespace MiR200RestClient
 
         private static HttpContent Serialize(object o)
         {
-            Console.WriteLine("Sending request");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(JsonConvert.SerializeObject(o));
-            Console.ResetColor();
             return new StringContent(
                 JsonConvert.SerializeObject(o),
                 Encoding.UTF8,

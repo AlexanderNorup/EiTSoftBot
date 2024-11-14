@@ -52,6 +52,7 @@ namespace MiRCommunicator
                 case SetMirStatusRequest statusRequest:
                     var newStateId = statusRequest.Ready ? MirState.Ready : MirState.Paused;
                     await _mirClient.SetStatusAsync(new RestStatusSet() { StateId = newStateId });
+                    await _monitor.RefreshState();
                     break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -163,6 +164,15 @@ namespace MiRCommunicator
                         Value = maxAccel.ToString(CultureInfo.InvariantCulture)
                     }).ConfigureAwait(false);
                 }
+
+                Console.WriteLine("Clearing Mission Queue");
+                await _mirClient.ClearMissionQueueAsync().ConfigureAwait(false);
+
+                Console.WriteLine("Adding our Mission to the mission queue");
+                await _mirClient.AddMissionToQueueAsync(new RestMissionQueueEntry()
+                {
+                    MissionId = mission.Id,
+                }).ConfigureAwait(false);
 
                 await SendResponse(new SetMissionResponse()
                 {
