@@ -2,7 +2,7 @@ import random
 from typing import List
 import json
 from paho.mqtt import client as mqtt_client
-from helperObjects import Box, Waypoint
+from helperObjects import Box, Mission, Waypoint
 from threading import Thread
 import signal
 
@@ -14,15 +14,15 @@ client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 client_response_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 
 username = 'eit'
-password = input("Input mqtt password: ").strip()
+password = input('Input mqtt password: ').strip()
 
 
 def connect_mqtt(client_id):
     def on_connect(client, userdata, flags, rc, properties):
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            print('Connected to MQTT Broker!')
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print('Failed to connect, return code %d\n', rc)
 
     client = mqtt_client.Client(client_id=client_id, callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2)
     client.username_pw_set(username, password)
@@ -33,21 +33,25 @@ def connect_mqtt(client_id):
 
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        print("Recieved message")
         data = json.loads(msg.payload.decode())
         if 'MessageName' not in data:
-            print("Message does not contain MessageName")
+            print(f'Received a message without MessageName: {data}')
             return
         
         if data['MessageName'] == 'PingRequest':
-            # Cannot publish with the same client while we "loop_forever", as that would block consuming events, or something along those lines. 
+            # Cannot publish with the same client while we 'loop_forever', as that would block consuming events, or something along those lines. 
             # Therefore we do a different thread and use a different client. 
             # This also blocks (because of join()) but python is weird like that. This works
+            print('Received ping.')
             thread = Thread(target=publishPing, args=(data,))
             thread.start()
             thread.join()
         elif data['MessageName'] == 'SimulationStartRequest':
-            handle_payload(client, data)
+            print('Received simulation start request.')
+            thread = Thread(target=handle_payload, args=(client,data))
+            thread.start()
+            thread.join()
+            #handle_payload(client, data)
 
     client.subscribe(topic)
     client.on_message = on_message
@@ -65,71 +69,111 @@ def publishPing(data):
     result = client.publish(response_topic, msg)
     status = result[0]
     if status == 0:
-        print(f"Sent `{msg}` to topic `{response_topic}`")
+        print(f'Responded to ping on topic `{response_topic}`')
     else:
-        print(f"Failed to send message to topic {response_topic}")
+        print(f'Failed to respond to ping on topic {response_topic}')
     client.disconnect()
     return
     
 
 
-def publishMission(client: mqtt_client, waypoints: List[Waypoint], maxAcceleration: float):
-    jsonWaypoints = [serializeWaypoint(waypoint) for waypoint in waypoints]
+def publishMission(client: mqtt_client, mission: Mission, maxAcceleration: float):
+    jsonMission = serializeMission(mission)
     data = {
-        "MaxAcceleration": maxAcceleration,
-        "Waypoints": jsonWaypoints
+        '$type': 'EiTSoftBot.Dto.Responses.SimulationEndResponse, EiTSoftBot.Dto',
+        'MessageName': 'SimulationEndResponse',
+        'Mission': jsonMission,
+        'MaxAcceleration': maxAcceleration
+        
     }
     msg = json.dumps(data)
     result = client.publish(response_topic, msg)
     status = result[0]
     if status == 0:
-        print(f"Sent `{msg}` to topic `{response_topic}`")
+        print(f'Published {msg[0:20]}... to {response_topic}')
     else:
-        print(f"Failed to send message to topic {response_topic}")
+        print(f'Failed to publish message to {response_topic}')
 
 
 def handle_payload(client: mqtt_client, payload):
-    boxes = [deserializeBox(jsonBox) for jsonBox in payload['Boxes']['$values']]
-    #waypoints = [deserializeWaypoint(jsonWaypoint) for jsonWaypoint in payload['Waypoints']['$values']]
+    try:
+        boxes = [deserializeBox(jsonBox) for jsonBox in payload['Boxes']]
+        mission = deserializeMission(payload['Mission'])
+    except:
+        print('Unable to unpack JSON')
+        return
 
-    print(boxes)
+    print(f'Received:\n{boxes}\n\n{mission}')
+
 
     
     # Load these into simulation
     # Get result of simulation (update waypoints and get max acceleration)
-    # publishMission(client, waypoints, maxAcceleration)
+    maxAcceleration = random.random() * 60 + 40
+    mission = dummy_scramble(mission)
+
+    publishMission(client, mission, maxAcceleration)
     return
+
+
+def dummy_scramble(mission: Mission) -> Mission:
+    for waypoint in mission.waypoints:
+        waypoint.speed = random.random() * 0.9 + 0.1
+    return mission
+
+
+def deserializeMission(jsonMission):
+    waypoints = [deserializeWaypoint(jsonWaypoint) for jsonWaypoint in jsonMission['Waypoints']]
+    return Mission(
+        id=jsonMission['Id'],
+        name=jsonMission['Name'],
+        waypoints=waypoints
+    )
+
+
+def serializeMission(mission: Mission):
+    jsonWaypoints = [serializeWaypoint(waypoint) for waypoint in mission.waypoints]
+
+    return {
+        '$type': 'EiTSoftBot.Dto.Entities.Mission, EiTSoftBot.Dto',
+        'Id': mission.id,
+        'Name': mission.name,
+        'Waypoints': jsonWaypoints
+    }
+
+
+def deserializeWaypoint(jsonWaypoint) -> Waypoint:
+    return Waypoint(
+        id=jsonWaypoint['Id'],
+        name=jsonWaypoint['Name'],
+        x=jsonWaypoint['X'],
+        y=jsonWaypoint['Y'],
+        rotation=jsonWaypoint['Rotation'],
+        speed=jsonWaypoint['Speed']
+    )
 
 
 def serializeWaypoint(waypoint: Waypoint):
     return {
-        "UUID": waypoint.uuid,
-        "X": waypoint.x,
-        "Y": waypoint.y,
-        "Speed": waypoint.speed
+        '$type': 'EiTSoftBot.Dto.Entities.Waypoint, EiTSoftBot.Dto',
+        'Id': waypoint.id,
+        'Name': waypoint.name,
+        'X': waypoint.x,
+        'Y': waypoint.y,
+        'Rotation': waypoint.rotation,
+        'Speed': waypoint.speed,
     }
 
 
 def deserializeBox(jsonBox) -> Box:
     return Box(
-        jsonBox['X'],
-        jsonBox['Y'],
-        jsonBox['Z'],
-        jsonBox['SizeX'],
-        jsonBox['SizeY'],
-        jsonBox['SizeZ'],
-        jsonBox['Weight'],
-    )
-
-
-def deserializeWaypoint(jsonWaypoint) -> Waypoint:
-    return Waypoint(
-        jsonWaypoint['Id'],
-        jsonWaypoint['Name'],
-        jsonWaypoint['X'],
-        jsonWaypoint['Y'],
-        jsonWaypoint['Rotation'],
-        jsonWaypoint['Speed']
+        x=jsonBox['X'],
+        y=jsonBox['Y'],
+        z=jsonBox['Z'],
+        sizeX=jsonBox['SizeX'],
+        sizeY=jsonBox['SizeY'],
+        sizeZ=jsonBox['SizeZ'],
+        weight=jsonBox['Weight'],
     )
 
 
@@ -137,7 +181,7 @@ def run():
     client = connect_mqtt(client_id)
 
     def closing(signum, frame):
-        print("Goodbye ):")
+        print('Goodbye ):')
         client.disconnect()
         exit(1)
     
