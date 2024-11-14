@@ -6,6 +6,6 @@ namespace EiTSoftBot.Dto.Requests
     {
         public override string MessageName => nameof(SimulationStartRequest);
         public List<GazeboBox> Boxes { get; set; } = new();
-        public Mission? Mission { get; set; }
+        public required Mission Mission { get; set; }
     }
 }

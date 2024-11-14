@@ -37,10 +37,11 @@ namespace EiTSoftBot.Services
             };
         }
 
-        public async Task SendGazeboBoxesAsync(List<GazeboBox> boxes)
+        public async Task StartSimulationAsync(Mission mission, List<GazeboBox> boxes)
         {
             var simulationStartRequest = new SimulationStartRequest()
             {
+                Mission = mission,
                 Boxes = boxes
             };
             await OpenConnectionAsync();

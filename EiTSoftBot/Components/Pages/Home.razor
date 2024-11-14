@@ -135,7 +135,7 @@
     string Version = File.GetLastWriteTimeUtc(typeof(App).Assembly.Location).Ticks.ToString();
     private const string ThreeJsContainerId = "3dContainer";
     private bool _fecthedRealMissions = false;
-    private string _selectedMissionID;
+    private string? _selectedMissionID;
 
     private double XValue { get; set; } = 0d;
     private double YValue { get; set; } = 0d;
@@ -205,8 +205,13 @@
                 return;
             }
             var gazeboBoxes = boxes.Select(x=>x.AsGazeboBox()).ToList();
-            // TODO: also send mission with _selectedMissionID
-            await simulatorClient.SendGazeboBoxesAsync(gazeboBoxes);
+            var mission = missionRepo.Missions.FirstOrDefault(x => x.Id == _selectedMissionID);
+            if(mission is null)
+            {
+                await jsRuntime.InvokeVoidAsync("showErrorToast", "Please select a mission.");
+                return;
+            }
+            await simulatorClient.StartSimulationAsync(mission, gazeboBoxes);
             await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
         }
         catch (Exception e)

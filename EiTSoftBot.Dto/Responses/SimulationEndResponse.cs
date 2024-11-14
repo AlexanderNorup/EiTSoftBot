@@ -5,6 +5,7 @@ namespace EiTSoftBot.Dto.Responses
     public class SimulationEndResponse : BaseMessage
     {
         public override string MessageName => nameof(SimulationEndResponse);
-        public Mission? Mission { get; set; }
+        public required Mission Mission { get; set; }
+        public double MaxAcceleration { get; set; } = 1.0d;
     }
 }
