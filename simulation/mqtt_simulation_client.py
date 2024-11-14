@@ -109,7 +109,7 @@ def handle_payload(client: mqtt_client, payload):
     
     # Load these into simulation
     # Get result of simulation (update waypoints and get max acceleration)
-    maxAcceleration = random.random() * 60 + 40
+    maxAcceleration = int(random.random() * 60 + 40)
     mission = dummy_scramble(mission)
 
     publishMission(client, mission, maxAcceleration)
