@@ -6,7 +6,7 @@ namespace EiTSoftBot.Dto
     {
         private static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
         {
-            TypeNameHandling = TypeNameHandling.All,
+            TypeNameHandling = TypeNameHandling.Auto,
         };
 
         public static string Serialize(object request)
