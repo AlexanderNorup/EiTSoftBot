@@ -1,4 +1,5 @@
 using EiTSoftBot.Dto.Entities;
+using Newtonsoft.Json;
 
 namespace EiTSoftBot.Dto.Responses
 {

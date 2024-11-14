@@ -60,9 +60,10 @@ namespace EiTSoftBot.Services
                 .Build());
         }
 
-        public async Task<(bool mirConnected, bool simulationConnected)> GetOtherClientConnectionStatus(TimeSpan timeout)
+        public async Task<(bool mirConnectorConnected, bool mirConnected, bool simulationConnected)> GetOtherClientConnectionStatus(TimeSpan timeout)
         {
             var waitingFor = Guid.NewGuid().ToString();
+            bool mirConnectorAlive = false;
             bool mirAlive = false;
             bool simAlive = false;
             Action<BaseMessage> listener = (e) =>
@@ -72,7 +73,8 @@ namespace EiTSoftBot.Services
                 {
                     if (ping.Source == "MiRCommunicator")
                     {
-                        mirAlive = true;
+                        mirConnectorAlive = true;
+                        mirAlive = ping.MiRConnected == true;
                     }
                     else if (ping.Source == "Simulation")
                     {
@@ -104,10 +106,10 @@ namespace EiTSoftBot.Services
                 cts.CancelAfter(timeout);
                 while (!cts.IsCancellationRequested)
                 {
-                    if (mirAlive && simAlive)
+                    if (mirConnectorAlive && simAlive)
                     {
                         logger.LogDebug("Both Mir and Sim alive!");
-                        return (true, true);
+                        return (true, mirAlive, true);
                     }
                     await Task.Delay(100).ConfigureAwait(false);
                 }
@@ -121,8 +123,8 @@ namespace EiTSoftBot.Services
                 OnMessageRecieved -= listener;
             }
 
-            logger.LogDebug("Mir Alive: {MirAlive}, Sim Alive: {SimAlive}", mirAlive, simAlive);
-            return (mirAlive, simAlive);
+            logger.LogDebug("MiR Connector Alive: {MirConnectorAlive}, MiR Alive: {MirAlive} , Sim Alive: {SimAlive}", mirConnectorAlive, mirAlive, simAlive);
+            return (mirConnectorAlive, mirAlive, simAlive);
         }
 
         internal void SimulateRecieveMessage(BaseMessage msg)

@@ -12,8 +12,10 @@ namespace EiTSoftBot.Services
             timer = new System.Timers.Timer(TimeSpan.FromSeconds(10));
             timer.Elapsed += async (sender, e) => await RefreshState();
             timer.Start();
+            _ = RefreshState();
         }
 
+        public bool MirConnectorConnected { get; private set; }
         public bool MirConnected { get; private set; }
         public bool SimulatorConnected { get; private set; }
         private bool IsRefreshing { get; set; }
@@ -27,10 +29,13 @@ namespace EiTSoftBot.Services
             IsRefreshing = true;
             try
             {
-                (var newMir, var newSim) = await client.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
+                (var newMirConnector, var newMir, var newSim) = await client.GetOtherClientConnectionStatus(TimeSpan.FromSeconds(1));
 
-                if (newMir != MirConnected || newSim != SimulatorConnected)
+                if (newMirConnector != MirConnectorConnected
+                    || newMir != MirConnected
+                    || newSim != SimulatorConnected)
                 {
+                    MirConnectorConnected = newMirConnector;
                     MirConnected = newMir;
                     SimulatorConnected = newSim;
                     client.SimulateRecieveMessage(new RefreshStateMessage());

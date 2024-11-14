@@ -168,7 +168,7 @@
         else if (message is RefreshStateMessage)
         {
             _ = InvokeAsync(StateHasChanged);
-            if(!_fecthedRealMissions && monitor.MirConnected)
+            if(!_fecthedRealMissions && monitor.MirConnectorConnected)
             {
                 _ = RefreshMissions();
             }
@@ -177,7 +177,7 @@
 
     public async Task RefreshMissions()
     {
-        if (monitor.MirConnected)
+        if (monitor.MirConnectorConnected)
         {
             await simulatorClient.RequestMissionsAsync();
         }else

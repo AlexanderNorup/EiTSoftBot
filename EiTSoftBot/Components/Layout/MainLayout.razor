@@ -23,7 +23,7 @@
                         </li>
                     </ul>
                     <span class="bg-white rounded px-2">
-                        MiR Connected: <span class="@(monitor.MirConnected ? "text-success" : "text-danger")">@monitor.MirConnected</span> | Sim Connected: <span class="@(monitor.SimulatorConnected ? "text-success" : "text-danger")">@monitor.SimulatorConnected</span>
+                        MiR Connected: <span class="@MirColor">@MirMessage</span> | Sim Connected: <span class="@(monitor.SimulatorConnected ? "text-success" : "text-danger")">@monitor.SimulatorConnected</span>
 
                         <i class="bi bi-arrow-clockwise ms-1" style="cursor: pointer;" @onclick="monitor.RefreshState"></i>
                     </span>
@@ -49,6 +49,32 @@
     {
         client.OnMessageRecieved += OnMessage;
     }
+
+    public string MirColor
+    {
+        get
+        {
+            return monitor switch
+            {
+                { MirConnectorConnected: true, MirConnected: true } => "text-sucess",
+                { MirConnectorConnected: true, MirConnected: false } => "text-warning",
+                _ => "text-danger"
+            };
+        }
+    }
+
+    public string MirMessage {
+        get
+        {
+            return monitor switch {
+                { MirConnectorConnected: true, MirConnected: true } => "True",
+                { MirConnectorConnected: true, MirConnected: false } => "Connector Only",
+                { MirConnectorConnected: false, MirConnected: false } => "False",
+                _ => "Unknown"
+            };
+        }
+    }
+
 
     public void OnMessage(BaseMessage msg)
     {
