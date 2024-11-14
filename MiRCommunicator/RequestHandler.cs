@@ -13,11 +13,22 @@ using System.Text;
 
 namespace MiRCommunicator
 {
-    internal class RequestHandler(IMqttClient mqttClient, MirCommunicatorConfig config)
+    internal class RequestHandler
     {
-        private MiRRestClient _mirClient = new MiRRestClient(config.MirApiEndpoint, config.MirApiToken);
+        private IMqttClient _mqttClient;
+        private MirCommunicatorConfig _config;
+        private MiRRestClient _mirClient;
+        private MirMonitor _monitor;
         private SemaphoreSlim _positionSemaphore = new SemaphoreSlim(1, 1);
         private ConcurrentDictionary<string, RestPosition> _positionCache = new ConcurrentDictionary<string, RestPosition>();
+
+        internal RequestHandler(IMqttClient mqttClient, MirCommunicatorConfig config)
+        {
+            _mqttClient = mqttClient ?? throw new ArgumentNullException(nameof(mqttClient));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _mirClient = new MiRRestClient(config.MirApiEndpoint, config.MirApiToken);
+            _monitor = new MirMonitor(_mirClient);
+        }
 
         public async Task HandleRequestAsync(BaseMessage baseMessage)
         {
@@ -30,6 +41,7 @@ namespace MiRCommunicator
                     await SendResponse(new PingResponse()
                     {
                         PingId = pingRequest.PingId,
+                        MiRConnected = _monitor.MirConnected,
                         Source = "MiRCommunicator"
                     });
                     break;
@@ -43,8 +55,15 @@ namespace MiRCommunicator
 
         private async Task HandleGetAllMissionsRequest(GetAllMissionsRequest getAllMissionsRequest)
         {
+            if (!_monitor.MirConnected)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("MiR is not connected, cannot get missions");
+                Console.ResetColor();
+                return;
+            }
             var response = new GetAllMissionsResponse();
-            var allMissions = await _mirClient.GetMissionsForSessionAsync(config.MirSessionId).ConfigureAwait(false);
+            var allMissions = await _mirClient.GetMissionsForSessionAsync(_config.MirSessionId).ConfigureAwait(false);
             foreach (var mission in allMissions)
             {
                 List<Waypoint> responseWaypoints = new();
@@ -87,13 +106,13 @@ namespace MiRCommunicator
         {
             var responseJson = RequestSerializer.Serialize(response);
             var responseMessage = new MqttApplicationMessageBuilder()
-                .WithTopic(config.MqttResponseTopic)
+                .WithTopic(_config.MqttResponseTopic)
                 .WithPayload(Encoding.UTF8.GetBytes(responseJson))
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
                 .Build();
 
             Console.WriteLine($"Sending response of type: {response.GetType().Name}");
-            await mqttClient.PublishAsync(responseMessage);
+            await _mqttClient.PublishAsync(responseMessage);
         }
 
         private async Task<RestPosition> GetPositionAsync(string positionId)

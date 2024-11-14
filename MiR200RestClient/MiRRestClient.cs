@@ -58,6 +58,27 @@ namespace MiR200RestClient
             return await DeserializeAsync<RestPosition>(response.Content);
         }
 
+        public async Task<RestStatus> GetStatus(TimeSpan? timeout = null)
+        {
+            string requestUri = $"status";
+            var cts = new CancellationTokenSource();
+            if (timeout is not null)
+            {
+                cts.CancelAfter(timeout.Value);
+            }
+            var response = await _httpClient.GetAsync(requestUri, cts.Token).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return await DeserializeAsync<RestStatus>(response.Content);
+        }
+
+        public async Task<RestStatus> SetStatus(RestStatusSet newStatus)
+        {
+            string requestUri = $"status";
+            var response = await _httpClient.PutAsync(requestUri, new StringContent(JsonConvert.SerializeObject(newStatus))).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return await DeserializeAsync<RestStatus>(response.Content);
+        }
+
         private async static Task<T> DeserializeAsync<T>(HttpContent content)
         {
             await content.LoadIntoBufferAsync().ConfigureAwait(false); // So we can potentially read the content multiple times in case of exceptions (where we'd like logging)
