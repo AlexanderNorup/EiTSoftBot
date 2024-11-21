@@ -74,10 +74,13 @@ window.init3DScene = (divId) => {
     containerDiv.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.5, 0);
+    controls.target.set(0, 1.2, 0);
     controls.update();
     controls.enablePan = false;
     controls.enableDamping = true;
+    controls.maxPolarAngle = Math.PI / 1.82; 
+    controls.maxDistance = 20;
+    controls.minDistance = 2;
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('jsm/libs/draco/gltf/');
