@@ -114,8 +114,6 @@ def handle_payload(client: mqtt_client, payload):
     maxAcceleration = int(random.random() * 60 + 40)
     mission = dummy_scramble(mission)
 
-    time.sleep(5)
-
     publishMission(client, mission, maxAcceleration)
     return
 

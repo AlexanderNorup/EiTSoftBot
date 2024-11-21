@@ -19,7 +19,7 @@
     <h1>MiR Box Configurator</h1>
 
     <div class="d-flex align-items-center">
-        <select class="form-select" id="missionSelect" @bind="_selectedMissionID">
+        <select disabled="@(SentToSimulation)" class="form-select" id="missionSelect" @bind="_selectedMissionID">
             <option>Choose mission</option>
             @foreach (var mission in missionRepo.Missions)
             {
@@ -129,12 +129,13 @@
             <div class="col-12">
                 <h2>Simulation response</h2>
 
-                <div>
-                    <p>
-                        Raw response:
-                        <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions() { WriteIndented = true })</pre>
-                    </p>
-                </div>
+                <p class="m-0"><b>Calculated Max Acceleration</b>: @simResponse.MaxAcceleration%<sup>of max-acceleration</sup></p>
+                <p class="m-0"><b>Misson with adjusted speeds</b>:</p>
+                <ol>
+                    @foreach(var waypoint in simResponse.Mission.Waypoints){
+                        <li><span class="badge rounded bg-primary me-2"><b>Waypoint: </b>@waypoint.Name</span> @Math.Round(waypoint.Speed.GetValueOrDefault(), 2) m/s</li>
+                    }
+                </ol>
 
                 @if (IsUpdatingMiR)
                 {
@@ -162,6 +163,12 @@
                     <button class="btn btn-warning ms-2" disabled="@(!monitor.MirConnected)" @onclick="() => SetMirStatus(false)">Pause MiR</button>
                     <button class="btn btn-danger ms-2" @onclick="ResetSimResult">Clear simulation response</button>
                 </div>
+
+                <details class="mt-4">
+                    <summary><span class="badge bg-secondary rounded me-2">Debug</span>Raw simulation response</summary>
+
+                    <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions() { WriteIndented = true })</pre>
+                </details>
             </div>
         }
         else
@@ -173,7 +180,7 @@
                     <span class="visually-hidden">Loading...</span>
                 </div>
                 <p>Waiting for a response from the simulation...</p>
-                <button class="btn btn-danger" @onclick="ResetSimResult">Abort waiting</button>
+                <button class="btn btn-danger" @onclick="ResetSimResult">Stop waiting</button>
             </div>
         }
     </div>
