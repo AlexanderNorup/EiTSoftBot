@@ -1,5 +1,6 @@
 using EiTSoftBot.Components;
 using EiTSoftBot.Services;
+using Microsoft.AspNetCore.StaticFiles;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -41,6 +42,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions()
 {
     ServeUnknownFileTypes = true,
+    ContentTypeProvider = new FileExtensionContentTypeProvider()
+    {
+        Mappings = { [".jsm"] = "application/javascript" }
+    }
 });
 app.UseAntiforgery();
 

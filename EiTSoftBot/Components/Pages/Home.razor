@@ -12,14 +12,14 @@
 @implements IDisposable
 <PageTitle>MiR Box Configurator</PageTitle>
 <HeadContent>
-    <script type="module" src="/js/threeJsInterop.js?v=@(Version)"></script>
+    <script type="module" src="/js/threeJsInterop.jsm?v=@(Version)"></script>
 </HeadContent>
 
 <div class="d-flex justify-content-between align-items-center">
     <h1>MiR Box Configurator</h1>
 
     <div class="d-flex align-items-center">
-        <select disabled="@(SentToSimulation)" class="form-select" id="missionSelect" @bind="_selectedMissionID">
+        <select disabled="@(SentToSimulation)" class="form-select" id="missionSelect" @onchange="OnMissionSelect" value="@_selectedMissionID">
             <option>Choose mission</option>
             @foreach (var mission in missionRepo.Missions)
             {
@@ -268,6 +268,16 @@
             await missionRepo.LoadFromCache();
             StateHasChanged();
         }
+    }
+
+    private async Task OnMissionSelect(ChangeEventArgs e)
+    {
+        _selectedMissionID = e.Value?.ToString();
+        var mission = missionRepo.Missions.FirstOrDefault(x => x.Id == _selectedMissionID); 
+        if(mission is not null){
+            await mirConfig.Set3DMission(mission);
+        }
+        StateHasChanged();
     }
 
     public async Task SubmitBoxes()

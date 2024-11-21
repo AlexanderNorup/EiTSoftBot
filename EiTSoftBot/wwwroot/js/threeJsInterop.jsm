@@ -1,10 +1,12 @@
 ﻿// inspired by https://github.com/mrdoob/three.js/blob/master/examples/webgl_animation_keyframes.html
 import * as THREE from 'three';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
 // Post processing
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -44,7 +46,22 @@ let outlinePass;
  */
 let currentTntAnims = [];
 
+/**
+ * @type {THREE.Font}
+ */
+let globalFont = null;
+
 let explosionModel = null;
+/**
+ * @type {Mission}
+ */
+let currentMission = null;
+
+/**
+ * @type {THREE.Mesh<THREE.Mesh,THREE.Material,THREE.Object3DEventMap>[]}
+ */
+let currentMissionTextLabels = [];
+let currentMissionMappings = [];
 
 window.init3DScene = (divId) => {
     let containerDiv = document.getElementById(divId);
@@ -82,6 +99,11 @@ window.init3DScene = (divId) => {
     controls.maxDistance = 20;
     controls.minDistance = 2;
 
+    const fontLoader = new FontLoader();
+    fontLoader.load( '/models/helvetiker_regular.typeface.json', function ( font ) {
+        globalFont = font;
+    });
+
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('jsm/libs/draco/gltf/');
 
@@ -101,7 +123,11 @@ window.init3DScene = (divId) => {
 
     glbLoader.load('/models/warehouse.glb', function (gltf) {
         const model = gltf.scene;
-        model.position.set(-62.5, -3, 150);
+        // model.position.set(-62.5, -3, 150);
+        // model.scale.set(8, 8, 8);
+        
+        model.position.set(-62.5, -3, -30);
+        model.quaternion.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), Math.PI * 1.5 );
         model.scale.set(8, 8, 8);
         model.receiveShadow = true;
         model.castShadow = false;
@@ -157,6 +183,13 @@ window.init3DScene = (divId) => {
             }
             currentTntAnims = currentTntAnims.filter(x => !x.isDone);
         }
+
+        if(currentMissionTextLabels.length > 0){
+            for(let label of currentMissionTextLabels){
+                label.lookAt(camera.position);
+            }
+        }
+
         controls.update();
         composer.render();
     }
@@ -290,6 +323,48 @@ window.remove3DBox = (id) => {
 window.is3DInitialized = () => {
     return scene != null && camera != null && renderer != null;
 }
+
+window.loadMission = (mission) => {
+    const waypointScale = 10;
+    const HomePos =  {x: 6, y: 2.5};
+    window.clearMission();
+    currentMission = new Mission(mission);
+
+    for (let waypoint of currentMission.waypoints) {
+        const geometry = new THREE.SphereGeometry( .5, 200, 200 ); 
+        const material = new THREE.MeshBasicMaterial( { color: 0xeeeeee } ); 
+        const sphere = new THREE.Mesh( geometry, material ); 
+        sphere.position.set((waypoint.y - HomePos.y) * waypointScale, 1.5, (waypoint.x - HomePos.x) * waypointScale);
+        const text = new TextGeometry( waypoint.name, {
+            font: globalFont,
+            size: .8,
+            depth: .3,
+            curveSegments: 12,
+        } );
+        text.computeBoundingBox();
+
+        let textMesh = new THREE.Mesh( text, material );
+        textMesh.lookAt(camera.position);
+
+        textMesh.position.set(sphere.position.x, sphere.position.y + 1, sphere.position.z);
+        currentMissionTextLabels.push(textMesh);
+        currentMissionMappings.push(sphere);
+        scene.add( textMesh );
+        scene.add( sphere );
+    }
+
+    console.debug("Loaded mission: ", currentMission);
+}
+
+window.clearMission = () => {
+    currentMission = null;
+    for(let elem of currentMissionMappings){
+        scene.remove(elem);
+    }
+    for(let elem of currentMissionTextLabels){
+        scene.remove(elem);
+    }
+};
 
 const mirOffset = { x: -2.25, y: 0.55, z: -3.8 };
 /**
