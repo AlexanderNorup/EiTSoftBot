@@ -329,13 +329,15 @@ window.loadMission = (mission) => {
     const HomePos =  {x: 6, y: 2.5};
     window.clearMission();
     currentMission = new Mission(mission);
-
-    for (let waypoint of currentMission.waypoints) {
+    for (let i = 0; i < currentMission.waypoints.length; i++) {
+        let waypoint = currentMission.waypoints[i];
         const geometry = new THREE.SphereGeometry( .5, 200, 200 ); 
         const material = new THREE.MeshBasicMaterial( { color: 0xeeeeee } ); 
         const sphere = new THREE.Mesh( geometry, material ); 
+        sphere.castShadow = true;
         sphere.position.set((waypoint.y - HomePos.y) * waypointScale, 1.5, (waypoint.x - HomePos.x) * waypointScale);
-        const text = new TextGeometry( waypoint.name, {
+
+        const text = new TextGeometry( `${i + 1}: ${waypoint.name}` , {
             font: globalFont,
             size: .8,
             depth: .3,
@@ -344,13 +346,27 @@ window.loadMission = (mission) => {
         text.computeBoundingBox();
 
         let textMesh = new THREE.Mesh( text, material );
-        textMesh.lookAt(camera.position);
-
         textMesh.position.set(sphere.position.x, sphere.position.y + 1, sphere.position.z);
         currentMissionTextLabels.push(textMesh);
         currentMissionMappings.push(sphere);
         scene.add( textMesh );
         scene.add( sphere );
+
+        // Add an arrow of this isn't the last point
+        if(currentMission.waypoints.length > i + 1){
+            const nextWaypoint = currentMission.waypoints[i + 1];
+            const vectorToNextPoint = new THREE.Vector3((nextWaypoint.y - HomePos.y) * waypointScale, sphere.position.y, (nextWaypoint.x - HomePos.x) * waypointScale).sub(sphere.position);
+            const length = vectorToNextPoint.length() - 1;
+            const dir = vectorToNextPoint.normalize();
+            const origin = sphere.position;
+            
+            const hex = 0xffff00;
+
+            const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+            
+            currentMissionMappings.push(arrowHelper);
+            scene.add(arrowHelper);
+        }
     }
 
     console.debug("Loaded mission: ", currentMission);
