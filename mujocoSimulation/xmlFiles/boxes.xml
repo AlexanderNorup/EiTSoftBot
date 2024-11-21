@@ -7,15 +7,21 @@
   </default>
 
   <worldbody>
-    <body name="box0" pos="-0.326 -0.158 0.452">
+    <body name="box0" pos="0.326 0.158 0.452">
       <joint/>
       <geom name="boxshape0" type="box" size=".0525 .0625 .0925" mass=".063" rgba="1 0 1 1"/>
+    </body>
+    <body name="box1" pos="-0.326 -0.158 0.452">
+      <joint/>
+      <geom name="boxshape1" type="box" size=".0525 .0625 .0925" mass=".063" rgba="1 0 1 1"/>
     </body>
 
   </worldbody>
 
   <contact>
-    <pair geom1="body" geom2="boxshape0" condim="6" friction="0.035 0.035"/>
+    <pair geom1="body" geom2="boxshape0" condim="6" friction="0.05 0.05"/>
+    <pair geom1="boxshape0" geom2="boxshape1" condim="6" friction="0.05 0.05"/>
+    <pair geom1="body" geom2="boxshape1" condim="6" friction="0.05 0.05"/>
   </contact>
 
 </mujoco>

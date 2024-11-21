@@ -2,12 +2,11 @@ from config import *
 import src.simulation as sim
 
 class optimizer:
-    def __init__(self,env,numBox,scheduler,jointRoute,visualize=False,maxTick=100000):
+    def __init__(self,simulation,vel):
         self.bigCnt = 0
-        self.scheduler = scheduler
-        self.jointRoute = jointRoute
         self.torqueMultiplier = np.arange(1.,0.3,-0.1)
-        self.sim = sim.simulation(env,numBox,visualize,maxTick)
+        self.sim = simulation
+        self.vel = vel
 
     def step(self,env,tM):
         
@@ -17,7 +16,7 @@ class optimizer:
         env.init_viewer(distance=3.0,lookat=[0,0,0])
         pid.reset()
 
-        if self.sim.run(env,pid,self.scheduler,self.jointRoute):
+        if self.sim.run(pid,self.vel):
             return 1
         
         return 0
@@ -26,7 +25,7 @@ class optimizer:
     def run(self,env):
         
         for tM in self.torqueMultiplier:
-            if self.step(env,tM):
+            if not(self.step(env,tM)):
                 return 1
             env.close_viewer() 
-            bigCnt = bigCnt + 1
+            self.bigCnt = self.bigCnt + 1

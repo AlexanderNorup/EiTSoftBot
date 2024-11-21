@@ -33,8 +33,8 @@ class routeConverter:
             prvPos=pos
         return route
     
-    def scheduler(self,vel):
-        if self.n%2==0:
-            return np.array([self.route[self.n,0],self.route[self.n,1]]), np.array([vel*self.RpS,vel*self.RpS])
+    def scheduler(self,vel,n):
+        if n%2==0:
+            return np.array([self.route[n,0],self.route[n,1]]), np.array([vel*self.RpS,vel*self.RpS])
         else:
-            return np.array([self.route[self.n,0],self.route[self.n,1]]), np.array([self.maxRv*self.RpS,self.maxRv*self.RpS])
+            return np.array([self.route[n,0],self.route[n,1]]), np.array([self.maxRv*self.RpS,self.maxRv*self.RpS])

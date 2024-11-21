@@ -3,6 +3,7 @@ import mujoco
 import mediapy as media
 import numpy as np
 import sys
+import os
 import time
 import itertools
 import math
