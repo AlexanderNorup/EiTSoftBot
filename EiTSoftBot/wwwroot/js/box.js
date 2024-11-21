@@ -22,8 +22,13 @@ class Box {
     * @param {number} length
     * @param {number} height
     * @param {number} weight
+    * @param {object} data
     */
-    constructor(x, y, width, length, height, weight) {
+    constructor(x, y, width, length, height, weight, data=null) {
+        if (data !== null) {
+            Object.assign(this, data);
+            return;
+        }
         this.x = x;
         this.y = y;
         this.width = width;
@@ -67,8 +72,8 @@ class Box {
     showSnap(p, gridFactor) {
         p.stroke(255);
         p.fill(255);
-        this.snapX = Math.round(this.x / gridFactor) * gridFactor;
-        this.snapY = Math.round(this.y / gridFactor) * gridFactor;
+        this.snapX = Math.round(this.x / gridFactor) * gridFactor + Math.round(this.x / gridFactor);
+        this.snapY = Math.round(this.y / gridFactor) * gridFactor + Math.round(this.y / gridFactor);
         p.rect(this.snapX, this.snapY, this.width, this.length);
     }
 }

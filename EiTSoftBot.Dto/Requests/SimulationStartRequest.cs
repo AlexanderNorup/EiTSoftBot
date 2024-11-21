@@ -5,7 +5,7 @@ namespace EiTSoftBot.Dto.Requests
     public class SimulationStartRequest : BaseMessage
     {
         public override string MessageName => nameof(SimulationStartRequest);
-        public List<GazeboBox> Boxes { get; set; } = new();
+        public List<MujocoBox> Boxes { get; set; } = new();
         public required Mission Mission { get; set; }
     }
 }

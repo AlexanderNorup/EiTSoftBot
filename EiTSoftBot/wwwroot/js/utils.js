@@ -1,13 +1,13 @@
 /**
  * @param {Box[]} bs
  */
-function mouseReleaseCollision(bs) {
+function mouseReleaseCollision(bs, snapping) {
     sortBoxes(bs);
     bs.forEach((box) => {
         // If box is already at the bottom don't do anything
         if (box.z === 0) return;
 
-        let collidingBoxes = getBoxTopsBelow(box, bs);
+        let collidingBoxes = getBoxTopsBelow(box, bs, snapping);
         // If box has no boxes below it, snap to bottom
         if (collidingBoxes.length === 0) {
             box.z = 0;
@@ -28,10 +28,15 @@ function handleCollisionCurrentOrNew(targetBox, bs, snapping) {
     let topZ = 0;
     bs.forEach((box) => {
         if (targetBox === box) return;
-        if (collisionCheck(targetBox, box)) {
-            if (topZ < box.z + box.height) topZ = box.z + box.height
+        if (snapping) {
+            if (collisionCheckSnap(targetBox, box)) {
+                if (topZ < box.z + box.height) topZ = box.z + box.height
+            }
+        } else {
+            if (collisionCheck(targetBox, box)) {
+                if (topZ < box.z + box.height) topZ = box.z + box.height
+            }
         }
-        
     })
     targetBox.z = topZ;
 }
@@ -59,7 +64,6 @@ function collisionCheckSnap(boxA, boxB) {
         boxA.snapX < boxB.x + boxB.width && // A left edge past B right
         boxA.snapY + boxA.length > boxB.y && // A bottom edge past B top
         boxA.snapY < boxB.y + boxB.length;
-
 }
 
 /**
@@ -100,14 +104,21 @@ function removeHighlight(boxes) {
  * Gets the Z value of the top plane of each box directly below the target box
  * @param {Box} targetBox
  * @param {Box[]} bs
+ * @param {boolean} snapping
  * @returns {number[]}
  */
-function getBoxTopsBelow(targetBox, bs) {
+function getBoxTopsBelow(targetBox, bs, snapping) {
     let tops = [];
     bs.forEach((box) => {
         if (targetBox === box) return;
-        if (collisionCheck(targetBox, box) && box.z + box.height <= targetBox.z) {
-            tops.push(box.z + box.height);
+        if (snapping) {
+            if (collisionCheckSnap(targetBox, box) && box.z + box.height <= targetBox.z) {
+                tops.push(box.z + box.height);
+            }
+        } else {
+            if (collisionCheck(targetBox, box) && box.z + box.height <= targetBox.z) {
+                tops.push(box.z + box.height);
+            }
         }
     })
     return tops;

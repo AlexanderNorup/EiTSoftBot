@@ -1,4 +1,6 @@
 import random
+import time
+import os
 from typing import List
 import json
 from paho.mqtt import client as mqtt_client
@@ -45,12 +47,12 @@ def subscribe(client: mqtt_client):
             print('Received ping.')
             thread = Thread(target=publishPing, args=(data,))
             thread.start()
-            thread.join()
+            #thread.join()
         elif data['MessageName'] == 'SimulationStartRequest':
             print('Received simulation start request.')
             thread = Thread(target=handle_payload, args=(client,data))
             thread.start()
-            thread.join()
+            #thread.join()
             #handle_payload(client, data)
 
     client.subscribe(topic)
@@ -183,7 +185,7 @@ def run():
     def closing(signum, frame):
         print('Goodbye ):')
         client.disconnect()
-        exit(1)
+        os._exit(0)
     
     signal.signal(signal.SIGINT, closing)
 
