@@ -37,7 +37,7 @@ namespace EiTSoftBot.Services
             };
         }
 
-        public async Task StartSimulationAsync(Mission mission, List<GazeboBox> boxes)
+        public async Task StartSimulationAsync(Mission mission, List<MujocoBox> boxes)
         {
             var simulationStartRequest = new SimulationStartRequest()
             {

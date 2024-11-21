@@ -25,16 +25,16 @@ namespace EiTSoftBot
 
         public const double MiR2DToRealWorldDimentions = MiRLength / JsBox.JsMirLength;
 
-        public GazeboBox AsGazeboBox()
+        public MujocoBox AsMujocoBox()
         {
-            return new GazeboBox(
+            return new MujocoBox(
                 Id: Id,
                 X: Math.Round(((Y + (Length / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRLength) + MiRXOffset, 3),
                 Y: Math.Round((X + (Width / 2)) * MiR2DToRealWorldDimentions - CenterOfMiRWidth, 3),
                 Z: Math.Round(((Z + (Height / 2)) * MiR2DToRealWorldDimentions) + MiRHeight, 3),
-                SizeX: Math.Round(Length * MiR2DToRealWorldDimentions, 3),
-                SizeY: Math.Round(Width * MiR2DToRealWorldDimentions, 3),
-                SizeZ: Math.Round(Height * MiR2DToRealWorldDimentions, 3),
+                SizeX: Math.Round(Length * MiR2DToRealWorldDimentions / 2, 3),
+                SizeY: Math.Round(Width * MiR2DToRealWorldDimentions / 2, 3),
+                SizeZ: Math.Round(Height * MiR2DToRealWorldDimentions / 2, 3),
                 Weight: Weight);
         }
     }

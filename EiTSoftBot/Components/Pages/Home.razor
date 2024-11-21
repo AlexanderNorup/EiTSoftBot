@@ -50,9 +50,9 @@
             </div>
 
             <div class="d-grid gap-2">
-                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.1,0.1,0.1,1)">Add small box</button>
-                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.1,0.1,2)">Add medium box</button>
-                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.2,0.2,0.3,4)">Add large box</button>
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.185,0.075,0.165,0.062)">Add <i>"box2"</i></button>
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.125,0.105,0.185,0.063)">Add <i>"basebox"</i></button>
+                <button class="btn btn-outline-primary mt-1" onclick="addBox(0,0,0.215,0.225,0.16,0.149)">Add <i>"big box"</i></button>
                 <button class="btn btn-outline-danger mt-1" onclick="removeAllBoxes()">Remove all boxes</button>
                 <button class="btn btn-outline-secondary mt-1" data-bs-toggle="collapse" data-bs-target="#customBoxCollapse">Custom box</button>
             </div>
@@ -128,6 +128,14 @@
         </p>
     </div>
 </div>
+
+<div>
+    <p>
+        Mujoco Box:
+        <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions() { WriteIndented = true })</pre>
+    </p>
+</div>
+
 
 @if (_simulationEndResponse is {} simResponse){
 
@@ -258,15 +266,15 @@
             {
                 return;
             }
-            var gazeboBoxes = boxes.Select(x=>x.AsGazeboBox()).ToList();
+            var mujocoBoxes = boxes.Select(x=>x.AsMujocoBox()).ToList();
             var mission = missionRepo.Missions.FirstOrDefault(x => x.Id == _selectedMissionID);
             if(mission is null)
             {
                 await jsRuntime.InvokeVoidAsync("showErrorToast", "Please select a mission.");
                 return;
             }
-            await simulatorClient.StartSimulationAsync(mission, gazeboBoxes);
-            await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {gazeboBoxes.Count} boxes to the simulation!");
+            await simulatorClient.StartSimulationAsync(mission, mujocoBoxes);
+            await jsRuntime.InvokeVoidAsync("showSuccessToast", $"Sent {mujocoBoxes.Count} boxes to the simulation!");
         }
         catch (Exception e)
         {
