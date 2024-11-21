@@ -2,6 +2,10 @@ from config import *
 
 import src.routeConverter as rC
 import src.optimizer as optim
+from src.boxesXmlWriter import *
+
+boxesReceived = [[["-0.326","-0.158","0.452"],[".0525",".0625",".0925"],".063"]]
+writeBoxes(boxesReceived,0.035)
 
 xml_path = "xmlFiles/mobile_platform.xml"
 

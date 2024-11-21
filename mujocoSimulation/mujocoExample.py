@@ -13,6 +13,11 @@ from mujoco_parser import *
 from slider import *
 from utility import *
 
+from src.boxesXmlWriter import *
+
+boxesReceived = [[["-0.326","-0.158","0.452"],[".0525",".0625",".0925"],".063"]]
+writeBoxes(boxesReceived,0.035)
+
 xml_path = "xmlFiles/mobile_platform.xml"
 
 env = MuJoCoParserClass(name='mir200',rel_xml_path=xml_path,verbose=True)
@@ -63,10 +68,10 @@ v_trgt_list = np.zeros(shape=(max_tick,env.n_ctrl))
 qpos_list   = np.zeros(shape=(max_tick,env.n_ctrl))
 qvel_list   = np.zeros(shape=(max_tick,env.n_ctrl))
 torque_list = np.zeros(shape=(max_tick,env.n_ctrl))
-numbox = 4
+numbox = len(boxesReceived)
 boxes = []
 for i in range(numbox):
-    boxes.append("box" + str(i+1))
+    boxes.append("box" + str(i))
 boxz = np.zeros(shape=(max_tick,len(boxes)))
 
 cnt = 0
@@ -85,6 +90,9 @@ while cnt < len(jointRoute)-1:
     thrsBox = 0.1
     v_trgt = np.array([0,0])
     q_trgt = np.array([0,0])
+    vel = np.zeros(shape=(len(coordinates),1))
+    for i in vel.shape[0]:
+        vel[i]=1.1
 
     while (env.tick < max_tick) and (cnt < len(jointRoute)-1):
         
@@ -123,7 +131,6 @@ while cnt < len(jointRoute)-1:
                 break
 
         if i < len(boxes)-1:
-            
             break
     
     env.close_viewer() 
@@ -164,7 +171,7 @@ for a_idx,ax in enumerate(axs.ravel()):
     ax.set_title('Joint [%d]'%(a_idx),fontsize=8)
 plt.show()
 
-fig,axs = plt.subplots(nrows=1,ncols=len(boxes),sharex=False,sharey=False,figsize=(11,3))
+fig,axs = plt.subplots(nrows=1,ncols=numbox,sharex=False,sharey=False,figsize=(11,3))
 fig.subplots_adjust(hspace=0.4)
 fig.suptitle("box position", fontsize=10)
 for a_idx,ax in enumerate(axs.ravel()):
