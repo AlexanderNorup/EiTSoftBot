@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using EiTSoftBot.Dto.Entities;
+using Microsoft.JSInterop;
 
 namespace EiTSoftBot.Services
 {
@@ -23,6 +24,16 @@ namespace EiTSoftBot.Services
         public async Task<List<JsBox>> GetBoxConfiguration()
         {
             return await _jsRuntime.InvokeAsync<List<JsBox>>("getAll2DBoxes").ConfigureAwait(false);
+        }
+
+        public async Task Set3DMission(Mission mission)
+        {
+            await _jsRuntime.InvokeVoidAsync("loadMission", mission);
+        }
+        
+        public async Task Clear3DMission()
+        {
+            await _jsRuntime.InvokeVoidAsync("clearMission");
         }
     }
 }
