@@ -1,4 +1,6 @@
 import random
+import time
+import os
 from typing import List
 import json
 from paho.mqtt import client as mqtt_client
@@ -45,12 +47,12 @@ def subscribe(client: mqtt_client):
             print('Received ping.')
             thread = Thread(target=publishPing, args=(data,))
             thread.start()
-            thread.join()
+            #thread.join()
         elif data['MessageName'] == 'SimulationStartRequest':
             print('Received simulation start request.')
             thread = Thread(target=handle_payload, args=(client,data))
             thread.start()
-            thread.join()
+            #thread.join()
             #handle_payload(client, data)
 
     client.subscribe(topic)
@@ -111,6 +113,8 @@ def handle_payload(client: mqtt_client, payload):
     # Get result of simulation (update waypoints and get max acceleration)
     maxAcceleration = int(random.random() * 60 + 40)
     mission = dummy_scramble(mission)
+
+    time.sleep(5)
 
     publishMission(client, mission, maxAcceleration)
     return
@@ -183,7 +187,7 @@ def run():
     def closing(signum, frame):
         print('Goodbye ):')
         client.disconnect()
-        exit(1)
+        os._exit(0)
     
     signal.signal(signal.SIGINT, closing)
 
