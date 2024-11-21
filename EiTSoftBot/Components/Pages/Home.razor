@@ -27,15 +27,14 @@
             }
         </select>
 
-
         <i class="bi bi-arrow-clockwise ms-1" style="cursor: pointer;" @onclick="RefreshMissions"></i>
 
-        <button @onclick="SubmitBoxes" class="btn btn-success ms-2" style="min-width: 17rem;" disabled="@(IsSendingData || !monitor.SimulatorConnected)">@SubmitButtonText</button>
+        <button @onclick="SubmitBoxes" class="btn btn-success ms-2" style="min-width: 17rem;" disabled="@(SentToSimulation || !monitor.SimulatorConnected)">@SubmitButtonText</button>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-6 row">
+    <div class="col-md-6 row @(SentToSimulation ? "d-none" : "")">
         <div class="col-sm-4">
             <div class="card mb-2" style="width: 100%;display:none;" id="selectedBoxEditContainer">
                 <div class="bg-success text-white card-header">
@@ -123,6 +122,61 @@
         <div class="col-sm-8" id="canvasContainer">
         </div>
     </div>
+    
+    <div class="col-md-6 row @(SentToSimulation ? "" : "d-none")">
+        @if (_simulationEndResponse is { } simResponse)
+        {
+            <div class="col-12">
+                <h2>Simulation response</h2>
+
+                <div>
+                    <p>
+                        Raw response:
+                        <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions() { WriteIndented = true })</pre>
+                    </p>
+                </div>
+
+                @if (IsUpdatingMiR)
+                {
+                    <p>Sending data to MiR</p>
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                }
+
+                @if (_sentToMirSuccessfully is { } success)
+                {
+                    <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+                        <div class="card-header">MiR Status</div>
+                        <div class="card-body">
+                            <h5 class="card-title">@(success ? "Successfully updated the MiR" : "Failed to update the MiR")</h5>
+                        </div>
+                    </div>
+                }
+
+                <p>Current MiR status: <code>@monitor.MirStatusString</code></p>
+
+                <div>
+                    <button class="btn btn-primary" disabled="@(!monitor.MirConnected || IsUpdatingMiR)" @onclick="UpdateMirWithSimResponse">Send to MiR</button>
+                    <button class="btn btn-success ms-2" disabled="@(!monitor.MirConnected)" @onclick="() => SetMirStatus(true)">Start MiR</button>
+                    <button class="btn btn-warning ms-2" disabled="@(!monitor.MirConnected)" @onclick="() => SetMirStatus(false)">Pause MiR</button>
+                    <button class="btn btn-danger ms-2" @onclick="ResetSimResult">Clear simulation response</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            // Waiting for a response
+            <div class="col-12 text-center">
+                <h2>Simulating...</h2>
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Waiting for a response from the simulation...</p>
+                <button class="btn btn-danger" @onclick="ResetSimResult">Abort waiting</button>
+            </div>
+        }
+    </div>
     <div class="col-md-6">
         <div class="ThreeJsContainer" id="@ThreeJsContainerId">
             <!-- 3d Canvas will appear here -->
@@ -135,51 +189,6 @@
         </p>
     </div>
 </div>
-
-@if (_simulationEndResponse is {} simResponse){
-
-    <hr/>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2>Simulation response</h2>
-
-            <div>
-                <p>Raw response:
-                    <pre>@JsonSerializer.Serialize(simResponse, new JsonSerializerOptions(){WriteIndented = true})</pre>
-                </p>
-            </div>
-
-            @if (IsSendingData)
-            {
-                <p>Sending data to MiR</p>
-                <div class="spinner-border" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-            }
-
-            @if(_sentToMirSuccessfully is { } success)
-            {
-                <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-                  <div class="card-header">MiR Status</div>
-                  <div class="card-body">
-                    <h5 class="card-title">@(success ? "Successfully updated the MiR" : "Failed to update the MiR")</h5>
-                  </div>
-                </div>  
-            }
-
-            <p>Current MiR status: <code>@monitor.MirStatusString</code></p>
-
-            <div>
-                <button class="btn btn-primary" disabled="@(!monitor.MirConnected || IsSendingData)" @onclick="UpdateMirWithSimResponse">Send to MiR</button>
-                <button class="btn btn-success ms-2" disabled="@(!monitor.MirConnected)" @onclick="() => SetMirStatus(true)">Start MiR</button>
-                <button class="btn btn-warning ms-2" disabled="@(!monitor.MirConnected)" @onclick="() => SetMirStatus(false)">Pause MiR</button>
-                <button class="btn btn-danger ms-2" @onclick="ResetSimResult">Clear simulation response</button>
-            </div>
-        </div>
-    </div>
-
-}
 
 
 <script defer type="text/javascript" src="/js/sketch.js?v=@(Version)"></script>
@@ -196,7 +205,8 @@
     private double YValue { get; set; } = 0d;
     private double ZValue { get; set; } = 0d;
 
-    private bool IsSendingData { get; set; } = false;
+    private bool SentToSimulation {get; set; } = false;
+    private bool IsUpdatingMiR { get; set; } = false;
     private string SubmitButtonText { get; set; } = "Send to simulation";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -228,6 +238,11 @@
         }
         else if (message is RefreshStateMessage)
         {
+            if (!monitor.SimulatorConnected && _simulationEndResponse is null && SentToSimulation)
+            {
+                SentToSimulation = false;
+                _ = jsRuntime.InvokeVoidAsync("showErrorToast", "The simulator disconnected. Aborted simulating.");
+            }
             _ = InvokeAsync(StateHasChanged);
             if(!_fecthedRealMissions && monitor.MirConnectorConnected)
             {
@@ -250,12 +265,13 @@
 
     public async Task SubmitBoxes()
     {
-        if (IsSendingData)
+        if (SentToSimulation)
         {
             return;
         }
 
-        IsSendingData = true;
+        _simulationEndResponse = null;
+        SentToSimulation = true;
         SubmitButtonText = "Please wait...";
         StateHasChanged();
         try
@@ -278,10 +294,10 @@
         catch (Exception e)
         {
             await jsRuntime.InvokeVoidAsync("alert", "Failed to send data to the simulation\n" + e.Message);
+            SentToSimulation = false;
         }
         finally
         {
-            IsSendingData = false;
             SubmitButtonText = "Send to simulation";
             StateHasChanged();
         }
@@ -296,18 +312,19 @@
 
     public void ResetSimResult()
     {
+        SentToSimulation = false;
         _sentToMirSuccessfully = null;
         _simulationEndResponse = null;
     }
 
     public async Task UpdateMirWithSimResponse()
     {
-        if(_simulationEndResponse is null || IsSendingData)
+        if(_simulationEndResponse is null || IsUpdatingMiR)
         {
             return;
         }
 
-        IsSendingData = true;
+        IsUpdatingMiR = true;
         _sentToMirSuccessfully = null;
         StateHasChanged();
         try
@@ -322,7 +339,7 @@
         }
         finally
         {
-            IsSendingData = false;
+            IsUpdatingMiR = false;
         }
     }
 
