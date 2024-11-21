@@ -148,6 +148,59 @@ window.sketch = (p) => {
         return boxes;
     };
 
+    window.exportToString = () => {
+        let exported = JSON.stringify(boxes);
+        prompt("Copy and save this string", exported);
+    }
+
+    window.importFromString = () => {
+        try {
+            let input = prompt("Paste the string to import");
+            if (input === null) {
+                return;
+            }
+            let importBoxes = JSON.parse(input);
+            mapBoxesToClasses(importBoxes);
+            window.showSuccessToast("Successfully imported boxes");
+        } catch (e) {
+            window.showErrorToast("Failed to import boxes");
+            console.error("Failed to import boxes", e);
+            return;
+        }
+    }
+
+    window.quickSave = () => {
+        window.localStorage.setItem("quickSave", JSON.stringify(boxes));
+        window.showSuccessToast("Successfully saved to browser's storage");
+    }
+
+    window.quickLoad = () => {
+        let quickSaved = window.localStorage.getItem("quickSave");
+        if (quickSaved === null) {
+            return;
+        }
+        try {
+            let importBoxes = JSON.parse(quickSaved);
+            mapBoxesToClasses(importBoxes);
+            window.showSuccessToast("Successfully loaded boxes from browser's storage");
+        } catch (e) {
+            window.showErrorToast("Failed to import boxes");
+            console.error("Failed to import boxes", e);
+            return;
+        }
+    }
+
+    window.mapBoxesToClasses = (importBoxObjects) => {
+        let newBoxes = [];
+
+        for (let box of importBoxObjects) {
+            newBoxes.push(new Box(null, null, null, null, null, null, box));
+        }
+
+        window.removeAllBoxes();
+        boxes = newBoxes;
+    };
+
     p.mousePressed = (event) => {
         if (event.which === 1) {
             dragging = true;

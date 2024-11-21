@@ -22,8 +22,13 @@ class Box {
     * @param {number} length
     * @param {number} height
     * @param {number} weight
+    * @param {object} data
     */
-    constructor(x, y, width, length, height, weight) {
+    constructor(x, y, width, length, height, weight, data=null) {
+        if (data !== null) {
+            Object.assign(this, data);
+            return;
+        }
         this.x = x;
         this.y = y;
         this.width = width;
