@@ -22,16 +22,14 @@ function mouseReleaseCollision(bs) {
  * If a box is being dragged around or added, it is placed on top of any colliding boxes
  * @param {Box} targetBox
  * @param {Box[]} bs
- * @param {boolean} snapping
  */
-function handleCollisionCurrentOrNew(targetBox, bs, snapping) {
+function handleCollisionCurrentOrNew(targetBox, bs) {
     let topZ = 0;
     bs.forEach((box) => {
         if (targetBox === box) return;
         if (collisionCheck(targetBox, box)) {
             if (topZ < box.z + box.height) topZ = box.z + box.height
         }
-        
     })
     targetBox.z = topZ;
 }

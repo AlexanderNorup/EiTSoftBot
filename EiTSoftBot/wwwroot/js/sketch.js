@@ -66,7 +66,7 @@ window.sketch = (p) => {
     window.addBox = (x, y, width, length, height, weight) => {
         let newBox = new Box(x / RealWorldScale, y / RealWorldScale, width / RealWorldScale, length / RealWorldScale, height / RealWorldScale, weight);
         boxes.push(newBox);
-        handleCollisionCurrentOrNew(newBox, boxes, false);
+        handleCollisionCurrentOrNew(newBox, boxes);
         sortBoxes(boxes);
     };
 
@@ -75,7 +75,7 @@ window.sketch = (p) => {
             let newHoverBox = getBoxUnderMouse(p, boxes);
 
             if (hoverBox !== null && (newHoverBox === undefined || newHoverBox.id !== hoverBox.id)) {
-                // We are not hoveríng over the same box anymore.
+                // We are not hoverï¿½ng over the same box anymore.
                 hoverBox.mouseOver = false;
                 hoverBox = null;
             }
@@ -89,7 +89,7 @@ window.sketch = (p) => {
         window.before3DUpdate();
         boxes.forEach((box) => {
             if (box === currentBox) {
-                handleCollisionCurrentOrNew(box, boxes, snapping);
+                handleCollisionCurrentOrNew(box, boxes);
                 box.update(p);
                 if (snapping) {
                     box.showSnap(p, snappingFactor);
@@ -174,7 +174,7 @@ window.sketch = (p) => {
             currentBox.y = currentBox.snapY;
         }
 
-        mouseReleaseCollision(boxes);
+        mouseReleaseCollision(boxes, snapping);
         if (currentBox != null) {
             currentBox.dragging = false;
             window.highlight2DBox(currentBox);
