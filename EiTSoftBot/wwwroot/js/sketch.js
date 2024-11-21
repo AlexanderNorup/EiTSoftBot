@@ -66,7 +66,7 @@ window.sketch = (p) => {
     window.addBox = (x, y, width, length, height, weight) => {
         let newBox = new Box(x / RealWorldScale, y / RealWorldScale, width / RealWorldScale, length / RealWorldScale, height / RealWorldScale, weight);
         boxes.push(newBox);
-        handleCollisionCurrentOrNew(newBox, boxes);
+        handleCollisionCurrentOrNew(newBox, boxes, snapping);
         sortBoxes(boxes);
     };
 
@@ -89,7 +89,7 @@ window.sketch = (p) => {
         window.before3DUpdate();
         boxes.forEach((box) => {
             if (box === currentBox) {
-                handleCollisionCurrentOrNew(box, boxes);
+                handleCollisionCurrentOrNew(box, boxes, snapping);
                 box.update(p);
                 if (snapping) {
                     box.showSnap(p, snappingFactor);
@@ -120,7 +120,7 @@ window.sketch = (p) => {
         removeHighlight(boxes);
         highlightBox = null;
         boxes = boxes.filter((box) => box.id !== id);
-        mouseReleaseCollision(boxes);
+        mouseReleaseCollision(boxes, snapping);
         window.remove3DBox(id);
     };
 
@@ -226,7 +226,6 @@ window.sketch = (p) => {
             currentBox.x = currentBox.snapX;
             currentBox.y = currentBox.snapY;
         }
-
         mouseReleaseCollision(boxes, snapping);
         if (currentBox != null) {
             currentBox.dragging = false;
