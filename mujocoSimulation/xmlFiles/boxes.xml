@@ -1,0 +1,45 @@
+<mujoco model="boxes">
+
+  <option timestep="0.002" iterations="100" solver="Newton" gravity="0 0 -9.81" integrator="RK4"></option>
+  
+  <default>
+    <joint type="free"/>
+    <default class="base-box">
+      <geom type="box" size=".0525 .0625 .0925" mass=".063"/>
+    </default>
+    <default class="box-2">
+      <geom type="box" size=".0375 .0925 .0825" mass=".062"/>
+    </default>
+    <default class="bigBox">
+      <geom type="box" size=".08 .1075 .1125" mass=".149"/>
+    </default>
+  </default>
+  
+  <worldbody>
+    <body name="box1" pos="0 0 .465">
+      <joint/>
+      <geom name="boxshape1" class="bigBox" rgba="1 0 1 1"/>
+    </body>
+    <body name="box2" pos="0 0 .66">
+      <joint/>
+      <geom name="boxshape2" class="box-2" rgba="1 0 0 1"/>
+    </body>
+    <body name="box3" pos="0 0 0.82">
+      <joint/>
+      <geom name="boxshape3" class="box-2" rgba="0 0 1 1"/>
+    </body>
+    <body name="box4" pos="0 0 1.0">
+      <joint/>
+      <geom name="boxshape4" class="base-box" rgba="0 1 0 1"/>
+    </body>
+    
+  </worldbody>
+  
+  <contact>
+    <pair geom1="body" geom2="boxshape1" condim="6" friction=".035 .035"/>
+    <pair geom1="boxshape1" geom2="boxshape2" condim="6" friction=".035 .035"/>
+    <pair geom1="boxshape2" geom2="boxshape3" condim="6" friction=".035 .035"/>
+    <pair geom1="boxshape3" geom2="boxshape4" condim="6" friction=".035 .035"/>
+  </contact>
+
+</mujoco>

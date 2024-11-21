@@ -4,11 +4,12 @@ import numpy as np
 
 gravity = 9.8
 cardBoardToPlastic = 0.54
+airDensity = 1.185
 
-def maxAccBox(size,weight,pos,maxVel=0.1,material=1,shape=1):
+def maxAccBox(size,weight,pos,maxVel=0.9,material=1,shape=1):
     acc = 0
     if material and shape:
-        acc = ((weight*gravity*cardBoardToPlastic)-((size[1]*size[2]*maxVel*maxVel)/2))/weight
+        acc = ((weight*gravity*cardBoardToPlastic)-((size[1]*size[2]*airDensity*math.pow(maxVel,2))/2))/weight
 
     return acc
 
@@ -29,6 +30,6 @@ if __name__ == '__main__':
     plt.gca().set_ylim([0, 15])
     plt.autoscale(False)
     plt.show()
-    print(maxAccBox([0.1,0.5,0.5],0.01,1))
+    print(maxAccBox([0.1,0.185,0.46],0.063,1))
     print(accCal(np.arange(0.1,1.1,0.1),0.1))
 

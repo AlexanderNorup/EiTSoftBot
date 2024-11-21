@@ -1,0 +1,12 @@
+<mujoco model="snapbot scene">
+
+  <!-- MiR200 -->
+  <include file="./mir200.xml" />
+  
+  <!-- boxes -->
+  <include file="./boxes.xml" />
+
+  <!-- Floor and Sky -->
+  <include file="./worldSettings.xml" />
+
+</mujoco>
