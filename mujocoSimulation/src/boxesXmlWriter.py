@@ -1,5 +1,5 @@
 def writeBoxes(boxes,friction):
-    f = open("xmlFiles/boxes.xml", "a")
+    f = open("xmlFiles/boxes.xml", "w")
     f.write("<mujoco model=\"boxes\">")
     f.write("\n")
     f.write("\n")

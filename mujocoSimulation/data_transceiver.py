@@ -58,7 +58,6 @@ def subscribe(client: mqtt_client):
             thread = Thread(target=handle_payload, args=(client,data))
             thread.start()
             #thread.join()
-            handle_payload(client, data)
 
     client.subscribe(topic)
     client.on_message = on_message

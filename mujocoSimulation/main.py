@@ -7,9 +7,6 @@ from src.boxesXmlWriter import *
 
 
 def run_simulation(boxes, waypoints):
-    if os.path.isfile("xmlFiles/boxes.xml"):
-        os.remove("xmlFiles/boxes.xml")
-    
     writeBoxes(boxes,0.05)
 
     xml_path = "xmlFiles/mobile_platform.xml"
