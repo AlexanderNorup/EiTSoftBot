@@ -1,0 +1,14 @@
+mujoco
+opencv-python
+glfw
+numpy==1.23.5
+pyyaml
+imageio
+cvxpy
+shapely
+scipy
+matplotlib
+mediapy
+mujoco-python-viewer
+torch
+paho-mqtt==2.1.0
