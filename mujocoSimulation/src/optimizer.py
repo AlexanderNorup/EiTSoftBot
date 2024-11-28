@@ -2,12 +2,11 @@ from config import *
 
 class optimizer:
     def __init__(self,simulation):
-        self.bigCnt = 0
         self.torqueMultiplier = np.arange(1.,0.3,-0.1)
         self.velocities = np.arange(1.1,0.,-0.1)
         self.sim = simulation
-        self.output = 0
-        self.time = 0
+        self.output = []
+        self.time = []
 
     def step(self,tM,vel):
         
@@ -16,15 +15,18 @@ class optimizer:
 
         if self.sim.run(pid,vel):
             return 1
-        self.output = [tM,vel]
-        self.time = self.sim.timeRun
         return 0
-    
-
 
     def run(self):
         for tM in self.torqueMultiplier:
-            if not(self.step(tM,self.velocities[0])):
-                return self.output
-            self.bigCnt = self.bigCnt + 1
+            for vel in self.velocities:
+                if not(self.step(tM,vel)):
+                    self.output.append([tM,vel])
+                    self.time.append(self.sim.timeRun)
+                    if vel == self.velocities[0]:
+                        if self.output:
+                            return self.output[self.time.index(min(self.time))]
+                        else :
+                            return 0
+                    break
         return 0

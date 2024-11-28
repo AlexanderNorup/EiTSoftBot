@@ -24,7 +24,12 @@ def run_simulation(boxes, waypoints):
     simulation = sim.simulation(env,numBox,route,visualize)
     optimizer = optim.optimizer(simulation)
     out=optimizer.run()
-    print(f"Accel={out[0]}, Velocity={out[1]}", flush=True)
+    if out:
+        print(f"Accel={out[0]}, Velocity={out[1]}", flush=True)
+        print(optimizer.output)
+        print(optimizer.time)
+    else:
+        print("not possible")
     return out
 
 if __name__ == '__main__':
