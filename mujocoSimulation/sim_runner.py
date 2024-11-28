@@ -15,9 +15,9 @@ def run_simulation(boxes, waypoints):
     env.model.geom('floor').priority = 1 # 0=>1
 
     numBox=len(boxes)
-    vel=1.1
 
     route = rC.routeConverter(waypoints)
     simulation = sim.simulation(env,numBox,route,True)
-    optimizer = optim.optimizer(simulation,1.1)
-    return optimizer.run(env)
+    out,sim_time=optim.optimizer.run()
+    print(sim_time)
+    return out
