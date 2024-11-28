@@ -22,5 +22,5 @@ route = rC.routeConverter(routeCoordinates)
 
 simulation = sim.simulation(env,numBox,route,True)
 optimizer = optim.optimizer(simulation)
-out,simTime=optimizer.run()
-print(out,simTime)
+out=optimizer.run()
+print(out)

@@ -20,10 +20,11 @@ class optimizer:
         self.time = self.sim.timeRun
         return 0
     
+
+
     def run(self):
-        
         for tM in self.torqueMultiplier:
             if not(self.step(tM,self.velocities[0])):
-                return self.output,self.time
+                return self.output
             self.bigCnt = self.bigCnt + 1
         return 0
