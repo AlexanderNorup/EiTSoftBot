@@ -1,5 +1,6 @@
 import random
 import os
+import time
 from typing import List
 import json
 from threading import Thread
@@ -8,7 +9,7 @@ from math import radians
 from paho.mqtt import client as mqtt_client
 
 from helperObjects import Box, Mission, Waypoint
-from sim_runner import run_simulation
+from main import run_simulation
 
 broker = 'hosting.alexandernorup.com'
 port = 1883
@@ -18,8 +19,10 @@ client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 client_response_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 
 username = 'eit'
-password = input('Input mqtt password: ').strip()
-
+password = os.getenv("MQTT_PASSWORD")
+if password is None:
+    password = input('Input mqtt password: ')
+password = password.strip()
 
 def connect_mqtt(client_id):
     def on_connect(client, userdata, flags, rc, properties):
@@ -74,8 +77,13 @@ def handle_payload(client: mqtt_client, payload):
     input_boxes = [[[box.x, box.y, box.z], [box.sizeX, box.sizeY, box.sizeZ], box.weight] for box in boxes]
     input_waypoints = [[waypoint.x, waypoint.y, radians(waypoint.rotation)] for waypoint in mission.waypoints]
 
-    sim_result = run_simulation(input_boxes, input_waypoints)
-    max_acceleration = sim_result[0]
+    sim_result = None
+    try:
+        sim_result = run_simulation(input_boxes, input_waypoints)
+    except Exception as e: 
+        print(f'Failed to run simulation: {e}')
+        return
+    max_acceleration = int((sim_result[0] * 60) + 40) # Needs to be mapped to 40-100
     velocity = sim_result[1]
 
     for waypoint in mission.waypoints:

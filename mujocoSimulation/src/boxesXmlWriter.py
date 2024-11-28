@@ -16,11 +16,11 @@ def writeBoxes(boxes,friction):
     f.write("  <worldbody>")
     for i,x in enumerate(boxes):
         f.write("\n")
-        f.write("    <body name=\"box" + str(i) + "\" pos=\"" + x[0][0] + " " + x[0][1] + " " + x[0][2] + "\">")
+        f.write("    <body name=\"box" + str(i) + "\" pos=\"" + str(x[0][0]) + " " + str(x[0][1]) + " " + str(x[0][2]) + "\">")
         f.write("\n")
         f.write("      <joint/>")
         f.write("\n")
-        f.write("      <geom name=\"boxshape" + str(i) + "\" type=\"box\" size=\"" + x[1][0] + " " + x[1][1] + " " + x[1][2] + "\" mass=\"" + x[2] + "\" rgba=\"1 0 1 1\"/>")
+        f.write("      <geom name=\"boxshape" + str(i) + "\" type=\"box\" size=\"" + str(x[1][0]) + " " + str(x[1][1]) + " " + str(x[1][2]) + "\" mass=\"" + str(x[2]) + "\" rgba=\"1 0 1 1\"/>")
         f.write("\n")
         f.write("    </body>")
     f.write("\n")
