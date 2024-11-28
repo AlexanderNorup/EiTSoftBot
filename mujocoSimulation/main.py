@@ -16,11 +16,11 @@ env = MuJoCoParserClass(name='mir200',rel_xml_path=xml_path,verbose=True)
 env.model.geom('floor').priority = 1 # 0=>1
 
 numBox=len(boxesReceived)
-vel=1.1
 
 routeCoordinates = [[6.,2.5,0],[6.9,2.5,0],[7.8,2.5,math.pi/2],[7.8,14.7,math.pi],[6.1,14.7,-math.pi/2],[6.1,9.6,0],[6.9,9.6,-math.pi/2]]
 route = rC.routeConverter(routeCoordinates)
 
 simulation = sim.simulation(env,numBox,route,True)
-optimizer = optim.optimizer(simulation,1.1)
-optimizer.run(env)
+optimizer = optim.optimizer(simulation)
+out,simTime=optimizer.run()
+print(out,simTime)

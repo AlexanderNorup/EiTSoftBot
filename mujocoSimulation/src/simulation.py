@@ -11,10 +11,12 @@ class simulation:
         self.numbox = numBox
         self.route = route
         self.env = env
-        self.reset()
+        self.timeRun = 0
     
     def reset(self):
         self.time = np.zeros(shape=(self.maxTick))
+        self.v_trgt = np.array([0,0])
+        self.q_trgt = np.array([0,0])
         self.qpostrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.qveltrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.qpos = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
@@ -27,10 +29,18 @@ class simulation:
         self.v_trgt = np.array([0,0])
         self.q_trgt = np.array([0,0])
         self.n = 0
+
+        self.env.reset(step=True)
+        if self.visualize:
+            self.env.init_viewer(distance=3.0,lookat=[0,0,0])
     
-    def show(self):
-        if self.env.loop_every(tick_every=20):
+    def show(self,tick=20):
+        if self.env.loop_every(tick_every=tick):
             self.env.render()
+    
+    def closeSim(self):
+        if self.visualize:
+            self.env.close_viewer()
 
     def step(self,pid,vel):
         
@@ -38,9 +48,13 @@ class simulation:
         qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
         
         # Change PID target
-        if abs(self.q_trgt[0]-qpos[0])<self.thrs and abs(self.q_trgt[1]-qpos[1])<self.thrs and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+        if abs(self.q_trgt[0]-qpos[0])<self.thrs and abs(self.q_trgt[1]-qpos[1])<self.thrs: #and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+            try:
                 self.q_trgt,self.v_trgt = self.route.scheduler(vel,self.n)
-                self.n = self.n + 1
+            except:
+                print("end point reached")
+            self.n = self.n + 1
+        
         # PID controller
         pid.update(x_trgt=self.q_trgt,t_curr=self.env.get_sim_time(),x_curr=qpos,v_trgt=self.v_trgt,v_curr=qvel,VERBOSE=False)
         
@@ -67,14 +81,16 @@ class simulation:
         return 0
     
     def run(self,pid,vel):
-        
-        self.v_trgt = np.array([0,0])
-        self.q_trgt = np.array([0,0])
+
+        self.reset()
 
         while (self.env.tick < self.maxTick):
             if self.step(pid,vel):
-                self.reset()
+                self.closeSim()
                 return 1
-            elif self.n == len(self.route.route):
+            elif self.n > len(self.route.route):
+                self.timeRun = self.env.tick
+                self.closeSim()
                 return 0
-        return 0
+        self.closeSim()
+        return 1
