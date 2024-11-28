@@ -20,7 +20,10 @@ numBox=len(boxesReceived)
 routeCoordinates = [[6.,2.5,0],[6.9,2.5,0],[7.8,2.5,math.pi/2],[7.8,14.7,math.pi],[6.1,14.7,-math.pi/2],[6.1,9.6,0],[6.9,9.6,-math.pi/2]]
 route = rC.routeConverter(routeCoordinates)
 
-simulation = sim.simulation(env,numBox,route,True)
+visualize = os.getenv('VISUALIZE', "true").lower().strip() == "true"
+
+print(f"Visualize enabled: {visualize}")
+simulation = sim.simulation(env,numBox,route,visualize)
 optimizer = optim.optimizer(simulation)
 out=optimizer.run()
 print(out)

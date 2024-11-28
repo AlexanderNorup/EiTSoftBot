@@ -10,6 +10,8 @@ RUN pip install setuptools
 COPY ["requirements.txt", "."]
 RUN pip install -r requirements.txt
 
+ENV VISUALIZE=false
+
 FROM deps AS final
 
 COPY . .
