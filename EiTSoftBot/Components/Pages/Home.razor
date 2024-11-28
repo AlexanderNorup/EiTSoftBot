@@ -296,6 +296,7 @@
             var boxes = await mirConfig.GetBoxConfiguration();
             if (boxes.Count == 0)
             {
+                SentToSimulation = false;
                 return;
             }
             var mujocoBoxes = boxes.Select(x=>x.AsMujocoBox()).ToList();
@@ -303,6 +304,7 @@
             if(mission is null)
             {
                 await jsRuntime.InvokeVoidAsync("showErrorToast", "Please select a mission.");
+                SentToSimulation = false;
                 return;
             }
             await simulatorClient.StartSimulationAsync(mission, mujocoBoxes);
