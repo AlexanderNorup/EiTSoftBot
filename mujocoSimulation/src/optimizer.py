@@ -10,7 +10,7 @@ class optimizer:
 
     def step(self,tM,vel):
         
-        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 1.5*1./tM, out_min = -1.2*tM, out_max = 1.2*tM)
+        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 1.5*1./tM, out_min = -1.3*tM, out_max = 1.3*tM)
         pid.reset()
 
         if self.sim.run(pid,vel):
@@ -20,6 +20,7 @@ class optimizer:
     def run(self):
         for tM in self.torqueMultiplier:
             for vel in self.velocities:
+                print(tM,vel)
                 if not(self.step(tM,vel)):
                     self.output.append([tM,vel])
                     self.time.append(self.sim.timeRun)
@@ -27,6 +28,9 @@ class optimizer:
                         if self.output:
                             return self.output[self.time.index(min(self.time))]
                         else :
-                            return 0
+                            return [0,0]
                     break
-        return 0
+        return [0,0]
+    
+    def runSpecific(self,tM,vel):
+        self.step(tM,vel)

@@ -157,7 +157,7 @@ for a_idx,ax in enumerate(axs.ravel()):
     ax.plot(t_list[:env.tick],qvel_list[:env.tick,a_idx],
             '-',color='k',label='Current velocity')
     ax.plot(t_list[:env.tick],v_trgt_list[:env.tick,a_idx],
-            '--',color='r',label='Target position')
+            '--',color='r',label='Target velocity')
     ax.set_title('Joint [%d]'%(a_idx),fontsize=8)
     if a_idx == 0: ax.legend(fontsize=8)
 plt.show()
@@ -173,7 +173,7 @@ plt.show()
 
 fig,axs = plt.subplots(nrows=1,ncols=numbox,sharex=False,sharey=False,figsize=(11,3))
 fig.subplots_adjust(hspace=0.4)
-fig.suptitle("box position", fontsize=10)
+fig.suptitle("height of boxes", fontsize=10)
 for a_idx,ax in enumerate(axs.ravel()):
     ax.plot(t_list[:env.tick],boxz[:env.tick,a_idx],color='b')
     ax.set_title('Box %d'%(a_idx+1),fontsize=8)

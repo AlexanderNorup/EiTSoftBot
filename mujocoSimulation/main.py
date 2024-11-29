@@ -3,11 +3,12 @@ from config import *
 import src.routeConverter as rC
 import src.optimizer as optim
 import src.simulation as sim
+import src.plotter as plot
 from src.boxesXmlWriter import *
 
 
 def run_simulation(boxes, waypoints):
-    writeBoxes(boxes,0.05)
+    writeBoxes(boxes,0.035)
 
     xml_path = "xmlFiles/mobile_platform.xml"
 
@@ -24,7 +25,9 @@ def run_simulation(boxes, waypoints):
     simulation = sim.simulation(env,numBox,route,visualize)
     optimizer = optim.optimizer(simulation)
     out=optimizer.run()
-    if out:
+    # plt = plot.plotter(env.tick,simulation.time)
+    # plt.plotJointPos(simulation.qpos,simulation.qpostrgt)
+    if out[0]>0 and out[1]>0:
         print(f"Accel={out[0]}, Velocity={out[1]}", flush=True)
         print(optimizer.output)
         print(optimizer.time)

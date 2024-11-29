@@ -2,7 +2,7 @@ from config import *
 
 
 class simulation:
-    def __init__(self,env,numBox,route,visualize=False,maxTick=100000):
+    def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
         
         self.visualize = visualize
         self.maxTick = maxTick
