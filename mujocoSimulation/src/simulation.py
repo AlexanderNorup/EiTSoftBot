@@ -1,7 +1,7 @@
 from config import *
 
 
-class simulation:
+class simulationPID:
     def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
         
         self.visualize = visualize
@@ -15,8 +15,6 @@ class simulation:
     
     def reset(self):
         self.time = np.zeros(shape=(self.maxTick))
-        self.v_trgt = np.array([0,0])
-        self.q_trgt = np.array([0,0])
         self.qpostrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.qveltrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.qpos = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
@@ -89,6 +87,97 @@ class simulation:
                 self.closeSim()
                 return 1
             elif self.n > len(self.route.route):
+                self.timeRun = self.env.tick
+                self.closeSim()
+                return 0
+        self.closeSim()
+        return 1
+    
+
+class simulationStanley:
+    def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
+        
+        self.visualize = visualize
+        self.maxTick = maxTick
+        self.thrs = 0.1
+        self.thrsBox = 0.1
+        self.numbox = numBox
+        self.route = route
+        self.env = env
+        self.timeRun = 0
+    
+    def reset(self):
+        self.time = np.zeros(shape=(self.maxTick))
+        self.postrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.qveltrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.pos = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.qvel = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.torques = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.boxes = []
+        for i in range(self.numbox):
+            self.boxes.append("box" + str(i))
+        self.boxz = np.zeros(shape=(self.maxTick,self.numbox))
+        self.v_trgt = np.array([0,0])
+        self.pos_trgt = np.array([0,0])
+        self.n = 1
+
+        self.env.reset(step=True)
+        if self.visualize:
+            self.env.init_viewer(distance=3.0,lookat=[0,0,0])
+    
+    def show(self,tick=20):
+        if self.env.loop_every(tick_every=tick):
+            self.env.render()
+    
+    def closeSim(self):
+        if self.visualize:
+            self.env.close_viewer()
+
+    def step(self,stanley,vel):
+        
+        pos = self.env.get_x_y_yaw_body("mir200")
+        qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
+        
+        # Change PID target
+        if abs(self.pos_trgt[0]-pos[0])<self.thrs and abs(self.pos_trgt[1]-pos[1])<self.thrs: #and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+            try:
+                self.pos_trgt = self.route[self.n]
+                stanley.trajectory(pos,self.pos_trgt)
+            except:
+                print("end point reached")
+            self.n = self.n + 1
+        
+        # Update
+        torque = stanley.update(self.env,pos,qvel,vel)
+        self.env.step(ctrl=torque) # update
+
+        # Append
+        self.time[self.env.tick-1] = self.env.get_sim_time()
+        self.postrgt[self.env.tick-1,:] = self.pos_trgt[:2]
+        self.qveltrgt[self.env.tick-1,:] = self.v_trgt
+        self.pos[self.env.tick-1,:] = pos[:2]
+        self.qvel[self.env.tick-1,:] = qvel
+        self.torques[self.env.tick-1,:] = torque
+        for i in range(self.numbox):
+            self.boxz[self.env.tick-1,i] = self.env.get_p_body(self.boxes[i])[2]
+        
+        if self.visualize:
+            self.show()
+
+        for i in range(self.numbox):
+            if abs(self.boxz[0,i]-self.boxz[self.env.tick-1,i])>self.thrsBox:
+                return 1
+        return 0
+    
+    def run(self,stanley,vel):
+
+        self.reset()
+
+        while (self.env.tick < self.maxTick):
+            if self.step(stanley,vel):
+                self.closeSim()
+                return 1
+            elif self.n > len(self.route):
                 self.timeRun = self.env.tick
                 self.closeSim()
                 return 0

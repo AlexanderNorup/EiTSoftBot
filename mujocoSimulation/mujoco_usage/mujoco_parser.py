@@ -804,6 +804,14 @@ class MuJoCoParserClass(object):
         R = self.get_R_body(body_name)
         return p,R
     
+    def get_x_y_yaw_body(self,body_name):
+        """
+            Get [x,y,yaw]
+        """
+        p_body = self.get_p_body(body_name=body_name)
+        R_body = self.get_R_body(body_name=body_name)
+        return [p_body[0],p_body[1],np.arctan2(R_body[0,0],R_body[1,0])]
+
     def get_p_joint(self,joint_name):
         """
             Get joint position

@@ -6,7 +6,6 @@ import sys
 import os
 import time
 import itertools
-import math
 
 sys.path.append('helper/')
 sys.path.append('mujoco_usage/')

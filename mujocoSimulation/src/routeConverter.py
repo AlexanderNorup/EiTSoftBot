@@ -16,10 +16,10 @@ class routeConverter:
         for i,pos in enumerate(routeLst):
             x=pos[0]-prvPos[0]
             y=pos[1]-prvPos[1]
-            d=math.sqrt(math.pow(x,2)+math.pow(y,2))*distToRad
+            d=np.sqrt(np.power(x,2)+np.power(y,2))*distToRad
             o=(pos[2]-prvPos[2])
-            if abs(o)>math.pi:
-                o=2*math.pi+o
+            if abs(o)>np.pi:
+                o=2*np.pi+o
             o=o*4
             if i>0:
                 leftTotal=leftTotal+d

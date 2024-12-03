@@ -654,20 +654,14 @@ class PID_ControllerClass(object):
         """
             Get control output
         """
-        if abs(self.v_curr[0]) > abs(self.v_trgt[0]) :
-            if self.out_val[0]>0 and self.v_trgt[0]>0:
-                self.out_val[0] = -self.out_val[0]
-            elif self.out_val[0]<0 and self.v_trgt[0]<0:
-                self.out_val[0] = -self.out_val[0]
-            else:
-                self.out_val[0] = self.out_val[0]
-        if abs(self.v_curr[1]) > abs(self.v_trgt[1]):
-            if self.out_val[1]>0 and self.v_trgt[1]>0:
-                self.out_val[1] = -self.out_val[1]
-            elif self.out_val[1]<0 and self.v_trgt[1]<0:
-                self.out_val[1] = -self.out_val[1]
-            else:
-                self.out_val[1] = self.out_val[1]
+        for i in range(len(self.v_curr)):
+            if abs(self.v_curr[i]) > abs(self.v_trgt[i]) :
+                if self.out_val[i]>0 and self.v_trgt[i]>0:
+                    self.out_val[i] = -self.out_val[i]
+                elif self.out_val[i]<0 and self.v_trgt[i]<0:
+                    self.out_val[i] = -self.out_val[i]
+                else:
+                    self.out_val[i] = self.out_val[i]
         return self.out_val.copy()
 
 def sample_range(range):
