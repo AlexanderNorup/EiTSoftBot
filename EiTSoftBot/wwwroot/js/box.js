@@ -76,6 +76,33 @@ class Box {
         this.snapY = Math.round(this.y / gridFactor) * gridFactor + Math.round(this.y / gridFactor);
         p.rect(this.snapX, this.snapY, this.width, this.length);
     }
+
+    // Rotates box around Z axis (clockwise)
+    rotateAroundZ() {
+        nWidth = this.width;
+        nLength = this.length;
+
+        this.width = nLength;
+        this.length = nWidth;
+    }
+
+    // Rotates box around X axis (clockwise)
+    rotateAroundX() {
+        nLength = this.length;
+        nHeight = this.height;
+
+        this.length = nHeight;
+        this.height = nLength;
+    }
+
+    // Rotates box around Y axis (clockwise)
+    rotateAroundX() {
+        nWidth = this.width;
+        nHeight = this.height;
+
+        this.width = nHeight;
+        this.height = nWidth;
+    }
 }
 
 
