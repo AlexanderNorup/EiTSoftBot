@@ -3,7 +3,6 @@ from config import *
 
 class simulationPID:
     def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
-        
         self.visualize = visualize
         self.maxTick = maxTick
         self.thrs = 0.1
@@ -94,7 +93,7 @@ class simulationPID:
         return 1
     
 
-class simulationStanley:
+class simulationPP:
     def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
         
         self.visualize = visualize
@@ -133,22 +132,22 @@ class simulationStanley:
         if self.visualize:
             self.env.close_viewer()
 
-    def step(self,stanley,vel):
+    def step(self,PP,vel):
         
         pos = self.env.get_x_y_yaw_body("mir200")
         qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
         
-        # Change PID target
+        # Change target
         if abs(self.pos_trgt[0]-pos[0])<self.thrs and abs(self.pos_trgt[1]-pos[1])<self.thrs: #and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
             try:
                 self.pos_trgt = self.route[self.n]
-                stanley.trajectory(pos,self.pos_trgt)
+                PP.trajectory(pos,self.pos_trgt)
             except:
                 print("end point reached")
             self.n = self.n + 1
         
         # Update
-        torque = stanley.update(self.env,pos,qvel,vel)
+        torque = PP.update(self.env.get_sim_time(),pos,qvel,vel)
         self.env.step(ctrl=torque) # update
 
         # Append
@@ -169,12 +168,12 @@ class simulationStanley:
                 return 1
         return 0
     
-    def run(self,stanley,vel):
+    def run(self,PP,vel):
 
         self.reset()
 
         while (self.env.tick < self.maxTick):
-            if self.step(stanley,vel):
+            if self.step(PP,vel):
                 self.closeSim()
                 return 1
             elif self.n > len(self.route):

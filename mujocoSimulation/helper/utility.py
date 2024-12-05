@@ -532,7 +532,7 @@ class PID_ControllerClass(object):
             k_d       = 0.001,
             dt        = 0.01,
             dim       = 1,
-            dt_min    = 1e-6,
+            dt_min    = 1/1000,   # originally 1e-6,
             out_min   = -np.inf,
             out_max   = np.inf,
             ANTIWU    = True,   # anti-windup
@@ -656,10 +656,10 @@ class PID_ControllerClass(object):
         """
         for i in range(len(self.v_curr)):
             if abs(self.v_curr[i]) > abs(self.v_trgt[i]) :
-                if self.out_val[i]>0 and self.v_trgt[i]>0:
-                    self.out_val[i] = -self.out_val[i]
-                elif self.out_val[i]<0 and self.v_trgt[i]<0:
-                    self.out_val[i] = -self.out_val[i]
+                if self.out_val[i]>0 and self.v_curr[i]>self.v_trgt[i]:
+                    self.out_val[i] = 0
+                elif self.out_val[i]<0 and self.v_curr[i]<self.v_trgt[i]:
+                    self.out_val[i] = 0
                 else:
                     self.out_val[i] = self.out_val[i]
         return self.out_val.copy()
