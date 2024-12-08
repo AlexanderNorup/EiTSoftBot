@@ -1,0 +1,13 @@
+from config import *
+
+class operationalSpaceControl:
+    def __init__(self,k,out_min,out_max,thrs=0.1):
+        self.kp = k[0]
+        self.kd = k[1]
+        self.thrs = thrs
+        self.out_min = out_min
+        self.out_max = out_max
+        self.acc = np.array([0,0])
+    
+    def run(self):
+        return self.acc

@@ -6,25 +6,24 @@ import src.routeConverter as rC
 import src.plotter as plot
 
 class optimizer:
-    def __init__(self,env,numBox,waypoints,visualize,controlType=0,maxTick=1000000):
+    def __init__(self,env,numBox,waypoints,visualize,controlType=0,maxTick=5000):
         self.controlType = controlType
         self.maxTick = maxTick
         self.env = env
-        self.maxAcc = 2.
+        self.maxAcc = 1.
         self.accMultiplier = np.arange(1.,0.3,-0.1)
         self.velocities = np.arange(1.1,0.,-0.1)
         self.grid = []
+        self.waypoints = np.asarray(waypoints)-np.asarray(waypoints)[0]
         if controlType:
-            waypoints = np.asarray(waypoints)
-            waypoints = waypoints-waypoints[0]
-            self.simulation = sim.simulationPP(self.env,numBox,waypoints,visualize,maxTick)
+            self.simulation = sim.simulationPP(self.env,numBox,self.waypoints,visualize,maxTick)
         else:
-            route = rC.routeConverter(waypoints)
+            route = rC.routeConverter(self.waypoints)
             self.simulation = sim.simulationPID(self.env,numBox,route,visualize,maxTick)
 
     def stepPID(self,tM,vel):
         
-        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 1.*1./tM, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
+        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 2.*1./tM, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
         pid.reset()
 
         if self.simulation.run(pid,vel):
@@ -33,9 +32,9 @@ class optimizer:
     
     def stepPP(self,tM,vel):
         
-        PPcrl = PP.purePursuitController(k = [1.,1.*1./tM], LD=.5, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
+        PPctrl = PP.purePursuitController(k = [1.,1.*1./tM], LD=.2, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
 
-        if self.simulation.run(PPcrl,vel):
+        if self.simulation.run(PPctrl,vel):
             return 1
         return 0
     
@@ -114,5 +113,6 @@ class optimizer:
     def runSpecific(self,tM,vel):
         output = self.step(tM,vel)
         plt = plot.plotter(self.env.tick,self.simulation.time)
-        plt.plotTorque(self.simulation.torques)
+        # plt.plotTorque(self.simulation.torques)
+        plt.plotRoute(self.simulation.posPlot,self.waypoints)
         return [tM,vel]

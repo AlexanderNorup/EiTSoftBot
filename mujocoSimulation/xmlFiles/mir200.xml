@@ -13,44 +13,39 @@
   </default>
   
   <worldbody>
-    <body name="mir200" pos="0 0 .2385" euler='0 0 90'>
+    <body name="mir200" pos="0 0 .2385" euler='0 0 0'>
       <joint/>
       <geom name="body" type="box" mass="100" size=".445 .29 .1135" rgba=".9 .9 .9 1"/>
-      <body name="left-tire" pos="-.037646 .222604 -.176" euler='90 0 0'>
-        <joint name = "left-wheel" class="drive-wheel"/>
-        <geom class="drive-wheel"/>
-      </body>
-      <body name="right-tire" pos="-.037646 -.222604 -.176" euler='90 0 0'>
+      <body name="right-tire" pos=".0 .222604 -.176" euler='-90 0 0'>
         <joint name = "right-wheel" class="drive-wheel"/>
         <geom class="drive-wheel"/>
       </body>
-      <body name="front-left" pos=".3037 .203 -.176" euler='90 0 0'>
+      <body name="left-tire" pos=".0 -.222604 -.176" euler='-90 0 0'>
+        <joint name = "left-wheel" class="drive-wheel"/>
+        <geom class="drive-wheel"/>
+      </body>
+      <body name="front-left" pos=".3037 .203 -.176" euler='0 0 0'>
         <joint type="ball"/>
         <geom class="castor-wheel"/>
       </body>
-      <body name="front-right" pos=".3037 -.203 -.176" euler='90 0 0'>
+      <body name="front-right" pos=".3037 -.203 -.176" euler='0 0 0'>
         <joint type="ball"/>
         <geom class="castor-wheel"/>
       </body>
-      <body name="back-left" pos="-.3078 .203 -.176" euler='90 0 0'>
+      <body name="back-left" pos="-.3078 .203 -.176" euler='0 0 0'>
         <joint type="ball"/>
         <geom class="castor-wheel"/>
       </body>
-      <body name="back-right" pos="-.3078 -.203 -.176" euler='90 0 0'>
+      <body name="back-right" pos="-.3078 -.203 -.176" euler='0 0 0'>
         <joint type="ball"/>
         <geom class="castor-wheel"/>
       </body>
     </body>
-    <site name="vel"/> 
   </worldbody>
 
   <actuator>
     <motor name="ctrl_left_wheel" joint="right-wheel" ctrllimited="true" ctrlrange="-2. 2." />
     <motor name="ctrl_right_wheel" joint="left-wheel" ctrllimited="true" ctrlrange="-2. 2." />
   </actuator>
-
-  <sensor>
-    <velocimeter name="velo" site="vel" />
-  </sensor>
   
 </mujoco>
