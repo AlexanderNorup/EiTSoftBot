@@ -5,13 +5,13 @@ from src.boxesXmlWriter import *
 
 
 def run_simulation(boxes, waypoints):
-    writeBoxes(boxes,0.032)
+    writeBoxes(boxes,0.032) #0.032
 
     xml_path = "xmlFiles/mobile_platform.xml"
 
     env = MuJoCoParserClass(name='mir200',rel_xml_path=xml_path,verbose=True)
-    env.model.opt.timestep = env.model.opt.timestep*5
-    env.model.geom('floor').priority = 10 # 0=>1
+    env.model.opt.timestep = env.model.opt.timestep*20
+    env.model.geom('floor').priority = 1 # 0=>1
 
     numBox=len(boxes)
 
@@ -21,8 +21,8 @@ def run_simulation(boxes, waypoints):
     print(f"Visualize enabled: {visualize}")
 
     optimizer = optim.optimizer(env,numBox,waypoints,visualize,controlType,maxTick)
-    # out=optimizer.runGridDescent()
-    out=optimizer.runSpecific(1.,1.1)
+    out=optimizer.runGridDescent()
+    # out=optimizer.runSpecific(1.,1.1)
     if out[0]>0 and out[1]>0:
         print(f"Accel={out[0]}, Velocity={out[1]}", flush=True)
         print(optimizer.grid)

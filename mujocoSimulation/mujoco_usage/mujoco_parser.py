@@ -257,7 +257,7 @@ class MuJoCoParserClass(object):
 
     def init_viewer(
             self,
-            title         = None,
+            title         = "Running simulation",
             width         = 1400,
             height        = 1000,
             hide_menu     = True,
@@ -279,7 +279,7 @@ class MuJoCoParserClass(object):
             geomgroup_1   = None,
             geomgroup_2   = None,
             update        = False,
-            maxgeom       = 10000,
+            maxgeom       = 10000
         ):
         """ 
             Initialize viewer

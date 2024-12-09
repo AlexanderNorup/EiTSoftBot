@@ -124,7 +124,7 @@ class simulationOC:
 
         self.env.reset(step=True)
         if self.visualize:
-            self.env.init_viewer(distance=3.0,lookat=[0,0,0])
+            self.env.init_viewer(title="hej",width=2000,height=1500)
     
     def show(self,tick=20):
         if self.env.loop_every(tick_every=tick):

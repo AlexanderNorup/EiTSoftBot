@@ -82,7 +82,7 @@ def handle_payload(client: mqtt_client, payload):
     except Exception as e: 
         print(f'Failed to run simulation: {e}')
         return
-    max_acceleration = int((sim_result[0] * 60) + 40) # Needs to be mapped to 40-100
+    max_acceleration = int(sim_result[0] * 100) # Needs to be mapped to 40-100
     velocity = sim_result[1]
 
     for waypoint in mission.waypoints:
