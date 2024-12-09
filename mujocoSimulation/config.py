@@ -14,7 +14,8 @@ from slider import *
 from utility import *
 
 r = 0.0625 #Drivewheel radius
-L = 0.445208 #Seperation between drivewheels
+L = 0.446708 #Seperation between drivewheels + 0.0015
 RpS = 16 # 1m/s = 16 Radians/s
 maxRv = 0.6 # the maximum experienced rotational velocity [m/s]
 rr = 1/1000 # refresh rate currently 50Hz
+maxTick = 100000

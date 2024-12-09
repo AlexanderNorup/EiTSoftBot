@@ -49,3 +49,13 @@ class plotter:
             ax.plot(self.time[:self.tick],boxz[:self.tick,idxa],color='b')
             ax.set_title('Box %d'%(idxa+1),fontsize=8)
         plt.show()
+
+    def plotRoute(self,actualPath,desiredPath):
+        actualPath = np.array(actualPath)
+        desiredPath = np.array(desiredPath)
+        plt.plot(actualPath[:,0],actualPath[:,1])
+        plt.plot(desiredPath[:,0],desiredPath[:,1])
+        plt.plot(desiredPath[:,0],desiredPath[:,1],".")
+        plt.show()
+        plt.plot(actualPath[:,0],actualPath[:,2],desiredPath[:,0],desiredPath[:,2])
+        plt.show()

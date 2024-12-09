@@ -1,5 +1,6 @@
 import os,mujoco,time,cv2,copy,glfw
 import numpy as np
+from scipy.spatial.transform import Rotation
 from mujoco_custom_viewer import MujocoMinimalViewer
 """
 sys.path.append('../../package/helper/')
@@ -808,9 +809,10 @@ class MuJoCoParserClass(object):
         """
             Get [x,y,yaw]
         """
-        p_body = self.get_p_body(body_name=body_name)
-        R_body = self.get_R_body(body_name=body_name)
-        return [p_body[0],p_body[1],np.arctan2(R_body[0,0],R_body[1,0])]
+        p,R = self.get_pR_body(body_name=body_name)
+        r =  Rotation.from_matrix(R)
+        yaw = r.as_euler("xyz")[2]
+        return [p[0],p[1],yaw]
 
     def get_p_joint(self,joint_name):
         """

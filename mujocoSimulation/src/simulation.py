@@ -2,7 +2,7 @@ from config import *
 
 
 class simulationPID:
-    def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
+    def __init__(self,env,numBox,route,visualize=False,maxTick=5000):
         self.visualize = visualize
         self.maxTick = maxTick
         self.thrs = 0.1
@@ -10,6 +10,7 @@ class simulationPID:
         self.numbox = numBox
         self.route = route
         self.env = env
+        self.posPlot = []
         self.timeRun = 0
     
     def reset(self):
@@ -41,11 +42,12 @@ class simulationPID:
 
     def step(self,pid,vel):
         
+        self.posPlot.append(self.env.get_x_y_yaw_body("mir200"))
         qpos = self.env.data.qpos[self.env.ctrl_qpos_idxs]
         qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
         
         # Change PID target
-        if abs(self.q_trgt[0]-qpos[0])<self.thrs and abs(self.q_trgt[1]-qpos[1])<self.thrs: #and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+        if abs(self.q_trgt[0]-qpos[0])<self.thrs and abs(self.q_trgt[1]-qpos[1])<self.thrs and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
             try:
                 self.q_trgt,self.v_trgt = self.route.scheduler(vel,self.n)
             except:
@@ -93,15 +95,15 @@ class simulationPID:
         return 1
     
 
-class simulationPP:
-    def __init__(self,env,numBox,route,visualize=False,maxTick=50000):
-        
+class simulationOC:
+    def __init__(self,env,numBox,route,visualize=False,maxTick=5000):     
         self.visualize = visualize
         self.maxTick = maxTick
         self.thrs = 0.1
         self.thrsBox = 0.1
         self.numbox = numBox
         self.route = route
+        self.posPlot = []
         self.env = env
         self.timeRun = 0
     
@@ -116,8 +118,8 @@ class simulationPP:
         for i in range(self.numbox):
             self.boxes.append("box" + str(i))
         self.boxz = np.zeros(shape=(self.maxTick,self.numbox))
-        self.v_trgt = np.array([0,0])
-        self.pos_trgt = np.array([0,0])
+        self.v_trgt = np.array([0.,0.])
+        self.pos_trgt = np.array([0.,0.,0.])
         self.n = 1
 
         self.env.reset(step=True)
@@ -132,29 +134,32 @@ class simulationPP:
         if self.visualize:
             self.env.close_viewer()
 
-    def step(self,PP,vel):
+    def step(self,OC,vel):
         
-        pos = self.env.get_x_y_yaw_body("mir200")
+        currentPos = self.env.get_x_y_yaw_body("mir200")
+        self.posPlot.append(currentPos)
         qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
         
         # Change target
-        if abs(self.pos_trgt[0]-pos[0])<self.thrs and abs(self.pos_trgt[1]-pos[1])<self.thrs: #and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+        if abs(self.pos_trgt[0]-currentPos[0])<self.thrs and abs(self.pos_trgt[1]-currentPos[1])<self.thrs: # and (self.pos_trgt[2]-currentPos[2])<self.thrs and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
             try:
                 self.pos_trgt = self.route[self.n]
-                PP.trajectory(pos,self.pos_trgt)
+                self.vel_trgt = np.array([vel,vel])
             except:
                 print("end point reached")
             self.n = self.n + 1
         
+        OC.update(self.env.get_sim_time(),self.pos_trgt,currentPos,self.vel_trgt,qvel)
+
         # Update
-        torque = PP.update(self.env.get_sim_time(),pos,qvel,vel)
+        torque = OC.out()
         self.env.step(ctrl=torque) # update
 
         # Append
         self.time[self.env.tick-1] = self.env.get_sim_time()
         self.postrgt[self.env.tick-1,:] = self.pos_trgt[:2]
         self.qveltrgt[self.env.tick-1,:] = self.v_trgt
-        self.pos[self.env.tick-1,:] = pos[:2]
+        self.pos[self.env.tick-1,:] = currentPos[:2]
         self.qvel[self.env.tick-1,:] = qvel
         self.torques[self.env.tick-1,:] = torque
         for i in range(self.numbox):
@@ -168,12 +173,12 @@ class simulationPP:
                 return 1
         return 0
     
-    def run(self,PP,vel):
+    def run(self,OC,vel):
 
         self.reset()
 
         while (self.env.tick < self.maxTick):
-            if self.step(PP,vel):
+            if self.step(OC,vel):
                 self.closeSim()
                 return 1
             elif self.n > len(self.route):
