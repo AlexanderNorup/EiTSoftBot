@@ -95,7 +95,7 @@ class simulationPID:
         return 1
     
 
-class simulationPP:
+class simulationOC:
     def __init__(self,env,numBox,route,visualize=False,maxTick=5000):     
         self.visualize = visualize
         self.maxTick = maxTick
@@ -134,7 +134,7 @@ class simulationPP:
         if self.visualize:
             self.env.close_viewer()
 
-    def step(self,PP,vel):
+    def step(self,OC,vel):
         
         currentPos = self.env.get_x_y_yaw_body("mir200")
         self.posPlot.append(currentPos)
@@ -144,14 +144,15 @@ class simulationPP:
         if abs(self.pos_trgt[0]-currentPos[0])<self.thrs and abs(self.pos_trgt[1]-currentPos[1])<self.thrs: # and (self.pos_trgt[2]-currentPos[2])<self.thrs and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
             try:
                 self.pos_trgt = self.route[self.n]
-                PP.trajectory(currentPos.copy(),self.pos_trgt)
+                self.vel_trgt = np.array([vel,vel])
             except:
                 print("end point reached")
             self.n = self.n + 1
-            print(self.n)
         
+        OC.update(self.env.get_sim_time(),self.pos_trgt,currentPos,self.vel_trgt,qvel)
+
         # Update
-        torque = PP.update(self.env.get_sim_time(),currentPos,qvel,vel)
+        torque = OC.out()
         self.env.step(ctrl=torque) # update
 
         # Append
@@ -172,12 +173,12 @@ class simulationPP:
                 return 1
         return 0
     
-    def run(self,PP,vel):
+    def run(self,OC,vel):
 
         self.reset()
 
         while (self.env.tick < self.maxTick):
-            if self.step(PP,vel):
+            if self.step(OC,vel):
                 self.closeSim()
                 return 1
             elif self.n > len(self.route):

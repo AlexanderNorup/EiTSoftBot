@@ -1,6 +1,6 @@
 from config import *
 
-import src.purePursuitControl as PP
+import src.operationalControl as OC
 import src.simulation as sim
 import src.routeConverter as rC
 import src.plotter as plot
@@ -16,7 +16,7 @@ class optimizer:
         self.grid = []
         self.waypoints = np.asarray(waypoints)-np.asarray(waypoints)[0]
         if controlType:
-            self.simulation = sim.simulationPP(self.env,numBox,self.waypoints,visualize,maxTick)
+            self.simulation = sim.simulationOC(self.env,numBox,self.waypoints,visualize,maxTick)
         else:
             route = rC.routeConverter(self.waypoints)
             self.simulation = sim.simulationPID(self.env,numBox,route,visualize,maxTick)
@@ -32,7 +32,7 @@ class optimizer:
     
     def stepPP(self,tM,vel):
         
-        PPctrl = PP.purePursuitController(k = [1.,1.*1./tM], LD=.2, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
+        PPctrl = OC.operationalSpaceControl(k = [1.,1.*1./tM], out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
 
         if self.simulation.run(PPctrl,vel):
             return 1

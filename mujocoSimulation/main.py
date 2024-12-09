@@ -5,7 +5,7 @@ from src.boxesXmlWriter import *
 
 
 def run_simulation(boxes, waypoints):
-    writeBoxes(boxes,1.032)
+    writeBoxes(boxes,0.032)
 
     xml_path = "xmlFiles/mobile_platform.xml"
 
