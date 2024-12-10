@@ -34,6 +34,10 @@ class simulationPID:
     
     def show(self,tick=20):
         if self.env.loop_every(tick_every=tick):
+            # Update the camera to always look at the mir
+            mir200_pos = self.env.get_x_y_yaw_body("mir200")
+            self.env.viewer.cam.lookat = [mir200_pos[0], mir200_pos[1], 0.6]
+            # Render the scene
             self.env.render()
     
     def closeSim(self):
