@@ -13,7 +13,7 @@ from main import run_simulation
 
 broker = 'hosting.alexandernorup.com'
 port = 1883
-topic = 'eit'
+topic = '$share/simulation/eit'
 response_topic = 'eit_response'
 client_id = f'eit-mir-sim-{random.randint(0, 1000)}'
 client_response_id = f'eit-mir-sim-{random.randint(0, 1000)}'
