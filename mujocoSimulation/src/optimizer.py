@@ -10,20 +10,22 @@ class optimizer:
         self.controlType = controlType
         self.maxTick = maxTick
         self.env = env
-        self.maxAcc = 1.
-        self.accMultiplier = np.arange(1.,0.3,-0.1)
-        self.velocities = np.arange(1.1,0.,-0.1)
+        self.maxAcc = 2.
+        self.accMultiplier = np.arange(0.4,1.1,0.1)
+        self.velocities = np.arange(0.1,1.2,0.1)
         self.grid = []
         self.waypoints = np.asarray(waypoints)-np.asarray(waypoints)[0]
         if controlType:
-            self.simulation = sim.simulationOC(self.env,numBox,self.waypoints,visualize,maxTick)
+            route = rC.routeConverterOC(self.waypoints)
+            print(route.route)
+            self.simulation = sim.simulationOC(self.env,numBox,route,visualize,maxTick)
         else:
-            route = rC.routeConverter(self.waypoints)
+            route = rC.routeConverterPID(self.waypoints)
             self.simulation = sim.simulationPID(self.env,numBox,route,visualize,maxTick)
 
     def stepPID(self,tM,vel):
         
-        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 2.*1./tM, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
+        pid = PID_ControllerClass(dim = 2, k_p = 1., k_d = 3.*1./tM, out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
         pid.reset()
 
         if self.simulation.run(pid,vel):
@@ -32,7 +34,7 @@ class optimizer:
     
     def stepPP(self,tM,vel):
         
-        PPctrl = OC.operationalSpaceControl(k = [1.,1.*1./tM], out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
+        PPctrl = OC.operationalSpaceControl(k = [1.,6.], out_min = -self.maxAcc*tM, out_max = self.maxAcc*tM)
 
         if self.simulation.run(PPctrl,vel):
             return 1
@@ -47,18 +49,18 @@ class optimizer:
     def runBruteForce(self):
         output = []
         runTime = []
+        start = time.time()
         for tM in self.accMultiplier:
             for vel in self.velocities:
                 if not(self.step(tM,vel)):
                     output.append([tM,vel])
                     runTime.append(self.simulation.timeRun)
-                    if vel == self.velocities[0]:
-                        if output:
-                            return output[runTime.index(min(runTime))]
-                        else :
-                            return [0,0]
-                    break
-        return [0,0]
+
+        if output:
+            print(time.time()-start,min(runTime))
+            return output[runTime.index(min(runTime))]
+        else :
+            return [0,0] 
     
     def cost(self,boxstate):
         if boxstate:
@@ -67,47 +69,53 @@ class optimizer:
             return self.simulation.timeRun
 
     def runGridDescent(self):
-        tM = np.flip(self.accMultiplier)
-        vel = np.flip(self.velocities)
-        if self.step(tM[0],vel[0]):
+        start = time.time()
+        if self.step(self.accMultiplier[0],self.velocities[0]):
             return [0,0]
         else:
             runTime = self.simulation.timeRun
-            output = [tM[0],vel[0]]
+            output = [self.accMultiplier[0],self.velocities[0]]
+            # print(runTime,[0,0])
             cnttM = 0
             cntvel = 0
             while True:
                 self.grid.append([cnttM,cntvel])
                 try:
-                    if self.cost(self.step(tM[cnttM+1],vel[cntvel])) < runTime:
+                    if self.cost(self.step(self.accMultiplier[cnttM+1],self.velocities[cntvel])) <= runTime:
                         runTime = self.simulation.timeRun
                         try:
-                            if self.cost(self.step(tM[cnttM],vel[cntvel+1])) < runTime:
+                            if self.cost(self.step(self.accMultiplier[cnttM],self.velocities[cntvel+1])) <= runTime:
                                 runTime = self.simulation.timeRun
-                                output = [tM[cnttM],vel[cntvel+1]]
+                                output = [self.accMultiplier[cnttM],self.velocities[cntvel+1]]
                                 cntvel = cntvel + 1
+                                # print(runTime,[cnttM,cntvel])
                             else:
-                                output = [tM[cnttM+1],vel[cntvel]]
+                                output = [self.accMultiplier[cnttM+1],self.velocities[cntvel]]
                                 cnttM = cnttM + 1
+                                # print(runTime,[cnttM,cntvel])
                         except:
-                            output = [tM[cnttM+1],vel[cntvel]]
+                            output = [self.accMultiplier[cnttM+1],self.velocities[cntvel]]
                             cnttM = cnttM + 1
-                    elif self.cost(self.step(tM[cnttM],vel[cntvel+1])) < runTime:
+                            # print(runTime,[cnttM,cntvel])
+                    elif self.cost(self.step(self.accMultiplier[cnttM],self.velocities[cntvel+1])) <= runTime:
                         runTime = self.simulation.timeRun
-                        output = [tM[cnttM],vel[cntvel+1]]
+                        output = [self.accMultiplier[cnttM],self.velocities[cntvel+1]]
                         cntvel = cntvel + 1
+                        # print(runTime,[cnttM,cntvel])
                     else:
                         break
                 except:
                     try: 
-                        if self.cost(self.step(tM[cnttM],vel[cntvel+1])) < runTime:
+                        if self.cost(self.step(self.accMultiplier[cnttM],self.velocities[cntvel+1])) <= runTime:
                             runTime = self.simulation.timeRun
-                            output = [tM[cnttM],vel[cntvel+1]]
+                            output = [self.accMultiplier[cnttM],self.velocities[cntvel+1]]
                             cntvel = cntvel + 1
+                            # print(runTime,[cnttM,cntvel])
                         else:
                             break
                     except:
                         break
+        print(time.time()-start)
         return output
     
     def runSpecific(self,tM,vel):

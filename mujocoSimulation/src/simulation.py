@@ -30,7 +30,7 @@ class simulationPID:
 
         self.env.reset(step=True)
         if self.visualize:
-            self.env.init_viewer(distance=3.0,lookat=[0,0,0])
+            self.env.init_viewer()
     
     def show(self,tick=20):
         if self.env.loop_every(tick_every=tick):
@@ -87,14 +87,19 @@ class simulationPID:
 
         self.reset()
 
+        start = time.time()
+
         while (self.env.tick < self.maxTick):
             if self.step(pid,vel):
+                print(time.time()-start,self.env.tick)
                 self.closeSim()
                 return 1
             elif self.n > len(self.route.route):
+                print(time.time()-start,self.env.tick)
                 self.timeRun = self.env.tick
                 self.closeSim()
                 return 0
+        print(time.time()-start,self.env.tick)
         self.closeSim()
         return 1
     
@@ -113,47 +118,53 @@ class simulationOC:
     
     def reset(self):
         self.time = np.zeros(shape=(self.maxTick))
-        self.postrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.postrgt = np.zeros(shape=(self.maxTick,3))
         self.qveltrgt = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
-        self.pos = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
+        self.pos = np.zeros(shape=(self.maxTick,3))
         self.qvel = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.torques = np.zeros(shape=(self.maxTick,self.env.n_ctrl))
         self.boxes = []
         for i in range(self.numbox):
             self.boxes.append("box" + str(i))
         self.boxz = np.zeros(shape=(self.maxTick,self.numbox))
-        self.v_trgt = np.array([0.,0.])
-        self.pos_trgt = np.array([0.,0.,0.])
+        self.trgtVel = np.array([0.,0.])
+        self.trgtPos = np.array([0.,0.,0.])
+        self.prvTrgt = np.array([0.,0.,0.])
         self.n = 1
 
         self.env.reset(step=True)
         if self.visualize:
-            self.env.init_viewer(title="hej",width=2000,height=1500)
+            self.env.init_viewer()
     
     def show(self,tick=20):
         if self.env.loop_every(tick_every=tick):
+            # Update the camera to always look at the mir
+            mir200_pos = self.env.get_x_y_yaw_body("mir200")
+            self.env.viewer.cam.lookat = [mir200_pos[0], mir200_pos[1], 0.6]
+            # Render the scene
             self.env.render()
     
     def closeSim(self):
         if self.visualize:
             self.env.close_viewer()
 
-    def step(self,OC,vel):
+    def step(self,OC):
         
-        currentPos = self.env.get_x_y_yaw_body("mir200")
+        currentPos = np.array(self.env.get_x_y_yaw_body("mir200"))
         self.posPlot.append(currentPos)
         qvel = self.env.data.qvel[self.env.ctrl_qvel_idxs]
         
         # Change target
-        if abs(self.pos_trgt[0]-currentPos[0])<self.thrs and abs(self.pos_trgt[1]-currentPos[1])<self.thrs: # and (self.pos_trgt[2]-currentPos[2])<self.thrs and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
+        if abs(self.trgtPos[0]-currentPos[0])<self.thrs and abs(self.trgtPos[1]-currentPos[1])<self.thrs and (self.trgtPos[2]-currentPos[2])<self.thrs*0.1 and abs(qvel[0])<self.thrs and abs(qvel[1])<self.thrs: 
             try:
-                self.pos_trgt = self.route[self.n]
-                self.vel_trgt = np.array([vel,vel])
+                self.trgtPos = self.route.scheduler(self.n)
+                self.prvTrgt = self.route.scheduler(self.n-1)
             except:
                 print("end point reached")
             self.n = self.n + 1
+            print(self.n)
         
-        OC.update(self.env.get_sim_time(),self.pos_trgt,currentPos,self.vel_trgt,qvel)
+        OC.update(self.env.get_sim_time(),self.prvTrgt,self.trgtPos,currentPos,self.trgtVel,qvel)
 
         # Update
         torque = OC.out()
@@ -161,9 +172,9 @@ class simulationOC:
 
         # Append
         self.time[self.env.tick-1] = self.env.get_sim_time()
-        self.postrgt[self.env.tick-1,:] = self.pos_trgt[:2]
-        self.qveltrgt[self.env.tick-1,:] = self.v_trgt
-        self.pos[self.env.tick-1,:] = currentPos[:2]
+        self.postrgt[self.env.tick-1,:] = self.trgtPos
+        self.qveltrgt[self.env.tick-1,:] = self.trgtVel
+        self.pos[self.env.tick-1,:] = currentPos
         self.qvel[self.env.tick-1,:] = qvel
         self.torques[self.env.tick-1,:] = torque
         for i in range(self.numbox):
@@ -180,12 +191,13 @@ class simulationOC:
     def run(self,OC,vel):
 
         self.reset()
+        self.trgtVel = np.array([vel,vel])
 
         while (self.env.tick < self.maxTick):
-            if self.step(OC,vel):
+            if self.step(OC):
                 self.closeSim()
                 return 1
-            elif self.n > len(self.route):
+            elif self.n > len(self.route.route):
                 self.timeRun = self.env.tick
                 self.closeSim()
                 return 0

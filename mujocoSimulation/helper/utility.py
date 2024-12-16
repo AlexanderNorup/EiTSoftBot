@@ -612,40 +612,40 @@ class PID_ControllerClass(object):
             self.v_curr  = v_curr
         if x_curr is not None:
             self.x_curr  = x_curr
-            # PID controller updates here
-            self.dt       = max(self.t_curr - self.t_prev,self.dt_min)
-            self.err_curr = self.x_trgt - self.x_curr     
-            self.err_intg = self.err_intg + (self.err_curr*self.dt)
-            self.err_diff = self.err_curr - self.err_prev
-            
-            if self.dt > self.dt_min:
-                self.p_term   = self.k_p * self.err_curr
-                self.i_term   = self.k_i * self.err_intg
-                self.d_term   = self.k_d * self.err_diff / self.dt
-                self.out_val  = np.clip(
-                    a     = self.p_term + self.i_term + self.d_term,
-                    a_min = self.out_min,
-                    a_max = self.out_max)
-                # Smooth the output control value using EMA
-                self.out_val = self.out_alpha*self.out_val_prev + \
-                    (1.0-self.out_alpha)*self.out_val
-                self.out_val_prev = self.out_val
+        # PID controller updates here
+        self.dt       = max(self.t_curr - self.t_prev,self.dt_min)
+        self.err_curr = self.x_trgt - self.x_curr     
+        self.err_intg = self.err_intg + (self.err_curr*self.dt)
+        self.err_diff = self.err_curr - self.err_prev
+        
+        if self.dt > self.dt_min:
+            self.p_term   = self.k_p * self.err_curr
+            self.i_term   = self.k_i * self.err_intg
+            self.d_term   = self.k_d * self.err_diff / self.dt
+            self.out_val  = np.clip(
+                a     = self.p_term + self.i_term + self.d_term,
+                a_min = self.out_min,
+                a_max = self.out_max)
+            # Smooth the output control value using EMA
+            self.out_val = self.out_alpha*self.out_val_prev + \
+                (1.0-self.out_alpha)*self.out_val
+            self.out_val_prev = self.out_val
 
-                if VERBOSE:
-                    print ("cnt:[%d] t_curr:[%.5f] dt:[%.5f]"%
-                           (self.cnt,self.t_curr,self.dt))
-                    print (" x_trgt:   %s"%(self.x_trgt))
-                    print (" x_curr:   %s"%(self.x_curr))
-                    print (" err_curr: %s"%(self.err_curr))
-                    print (" err_intg: %s"%(self.err_intg))
-                    print (" p_term:   %s"%(self.p_term))
-                    print (" i_term:   %s"%(self.i_term))
-                    print (" d_term:   %s"%(self.d_term))
-                    print (" out_val:  %s"%(self.out_val))
-                    print (" err_out:  %s"%(self.err_out))
-            # Backup
-            self.t_prev   = self.t_curr
-            self.err_prev = self.err_curr
+            if VERBOSE:
+                print ("cnt:[%d] t_curr:[%.5f] dt:[%.5f]"%
+                        (self.cnt,self.t_curr,self.dt))
+                print (" x_trgt:   %s"%(self.x_trgt))
+                print (" x_curr:   %s"%(self.x_curr))
+                print (" err_curr: %s"%(self.err_curr))
+                print (" err_intg: %s"%(self.err_intg))
+                print (" p_term:   %s"%(self.p_term))
+                print (" i_term:   %s"%(self.i_term))
+                print (" d_term:   %s"%(self.d_term))
+                print (" out_val:  %s"%(self.out_val))
+                print (" err_out:  %s"%(self.err_out))
+        # Backup
+        self.t_prev   = self.t_curr
+        self.err_prev = self.err_curr
         # Counter
         if (t_curr is not None) and (x_curr is not None):
             self.cnt = self.cnt + 1
@@ -654,14 +654,14 @@ class PID_ControllerClass(object):
         """
             Get control output
         """
+
         for i in range(len(self.v_curr)):
             if abs(self.v_curr[i]) > abs(self.v_trgt[i]) :
                 if self.out_val[i]>0 and self.v_curr[i]>self.v_trgt[i]:
-                    self.out_val[i] = 0
+                    self.out_val[i] = 0.
                 elif self.out_val[i]<0 and self.v_curr[i]<self.v_trgt[i]:
-                    self.out_val[i] = 0
-                else:
-                    self.out_val[i] = self.out_val[i]
+                    self.out_val[i] = 0.
+
         return self.out_val.copy()
 
 def sample_range(range):

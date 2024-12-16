@@ -1,0 +1,50 @@
+
+Setup1:
+	Test no optim: 0000000000
+	[{"id":"a1f449ac-927d-4e76-a6b7-8f50bb29c74e","dragging":false,"mouseOver":false,"highlight":false,"x":132,"y":160,"z":0,"snapX":0,"snapY":0,"width":185.66546411083937,"length":75.26978274763758,"height":165.5935220448027,"weight":0.657,"offsetX":-102.84375,"offsetY":-64.40625},{"id":"f46b738f-a5d8-4ea3-9185-23f01ca3255c","dragging":false,"mouseOver":false,"highlight":false,"x":132,"y":162,"z":165.5935220448027,"snapX":0,"snapY":0,"width":185.66546411083937,"length":75.26978274763758,"height":165.5935220448027,"weight":0.617,"offsetX":-80.84375,"offsetY":-28.40625},{"id":"a4d0da25-36a5-44d8-aa17-c5f378ced3ba","dragging":false,"mouseOver":false,"highlight":true,"x":165,"y":163,"z":331.1870440896054,"snapX":0,"snapY":0,"width":125.44963791272932,"length":105.37769584669262,"height":185.66546411083937,"weight":0.64,"offsetX":-110.84375,"offsetY":-52.40625}]
+	boxes: [[[-0.182, 0.004, 0.442], [0.038, 0.092, 0.082], 0.657], [[-0.18, 0.004, 0.608], [0.038, 0.092, 0.082], 0.617], [[-0.184, 0.006, 0.782], [0.052, 0.062, 0.092], 0.64]]
+	waypoints: [[6.0, 2.5, 0.0], [6.9, 2.5, 0.0], [7.8, 2.5, 1.5707963267948966], [7.8, 14.7, 3.141592653589793]]
+	Optim Grid PD:
+		for time convertion: [7059, 6150, 5806, 4905, 4333, 3915, 3882, 3457]
+		runtime: 25.52
+		simtime: 2.507849748
+		Accel=0.7, Velocity=0.3
+		grid: [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2], [3, 2]]
+		Test with optim:1111110111
+	Optim Brute PD:
+		runtime: 103.07
+		simtime: 3267
+		Accel=0.9, Velocity=0.2
+
+Setup2:
+	Test no optim: 1110001011
+	[{"id":"c794e482-a755-4c16-9c3e-0277b590f2b7","dragging":false,"mouseOver":false,"highlight":false,"x":229,"y":287,"z":0,"snapX":0,"snapY":0,"width":185.66546411083937,"length":75.26978274763758,"height":165.5935220448027,"weight":0.612,"offsetX":-63.84375,"offsetY":-23.40625},{"id":"194a0178-f763-4fd4-832a-1972693c9312","dragging":false,"mouseOver":false,"highlight":false,"x":41,"y":287,"z":0,"snapX":0,"snapY":0,"width":185.66546411083937,"length":75.26978274763758,"height":165.5935220448027,"weight":0.657,"offsetX":-120.84375,"offsetY":-38.40625},{"id":"6fd9a5cf-95b4-4453-a344-10dc52c45beb","dragging":false,"mouseOver":false,"highlight":true,"x":126,"y":292,"z":165.5935220448027,"snapX":0,"snapY":0,"width":185.66546411083937,"length":105.37769584669262,"height":125.44963791272932,"weight":0.64,"offsetX":-90.84375,"offsetY":-47.40625}]
+	boxes: [[[-0.055, 0.1, 0.442], [0.038, 0.092, 0.082], 0.612], [[-0.055, -0.087, 0.442], [0.038, 0.092, 0.082], 0.657], [[-0.035, -0.002, 0.588], [0.052, 0.092, 0.062], 0.64]]
+	waypoints: [[6.0, 2.5, 0.0], [6.9, 2.5, 0.0], [7.8, 2.5, 1.5707963267948966], [7.8, 14.7, 3.141592653589793]]
+	Optim PD:
+		runtime: 39.99
+		simtime: 2187
+		Accel=1.0, Velocity=0.7
+		grid: [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6]]
+		Test with optim:1111111111
+	Optim Brute PD:
+		runtime: 129.6
+		simtime: 2187
+		Accel=1.0, Velocity=0.7
+	
+Setup3:
+	Test no optim: 1111111111
+	[{"id":"26b7282f-0fe3-4067-9c83-4f0f330519fa","dragging":false,"mouseOver":false,"highlight":true,"x":147,"y":291,"z":0,"snapX":0,"snapY":0,"width":165.5935220448027,"length":75.26978274763758,"height":185.66546411083937,"weight":0.657,"offsetX":-110.84375,"offsetY":-53.40625}]
+	boxes: [[[-0.051, 0.009, 0.452], [0.038, 0.082, 0.092], 0.657]]
+	waypoints: [[6.0, 2.5, 0.0], [6.9, 2.5, 0.0], [7.8, 2.5, 1.5707963267948966], [7.8, 14.7, 3.141592653589793]]
+	Optim PD:
+		runtime: 27.89
+		simtime: 2070
+		Accel=1.0, Velocity=1.1
+		grid:[[0, 0], [0, 1], [1, 1], [2, 1], [2, 2], [3, 2], [4, 2], [5, 2], [5, 3], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+		Test with optim: not needed since the same
+	Optim Brute PD:
+		runtime: 80.17
+		simtime: 2070
+		Accel=1.0, Velocity=1.1
+	
