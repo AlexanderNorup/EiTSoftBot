@@ -16,4 +16,4 @@ FROM deps AS final
 
 COPY . .
 
-ENTRYPOINT [ "python", "main.py" ]
+ENTRYPOINT [ "python", "data_transceiver.py" ]
